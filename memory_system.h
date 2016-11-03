@@ -11,13 +11,43 @@ typedef unsigned long int  reg64;
 typedef unsigned char bool;
 typedef unsigned char byte;
 // some alias 
-#define ABI_ZERO x[0]
-#define ABI_RA   x[1]
-#define ABI_SP   x[2]
-#define ABI_GP   x[3]
+#define zero x[0]    // hard-wired zero
+#define ra   x[1]    // return address
+#define s0   x[2]    // saved register
+#define fp   x[2]    // frame pointer
+#define s1   x[3]    // saved register
+#define s2   x[4]    // ..
+#define s3   x[5]    // .. 
+#define s4   x[6]    // ..
+#define s5   x[7]    // ..
+#define s6   x[8]    // ..
+#define s7   x[9]    // ..
+#define s8   x[10]   // ..
+#define s9   x[11]   // ..
+#define s10  x[12]   // ..
+#define s11  x[13]   // ..
+#define sp   x[14]   // stack pointer
+#define tp   x[15]   // thread pointer
+#define v0   x[16]   // return values
+#define v1   x[17]   // ..
+#define a0   x[18]   // function arguments
+#define a1   x[19]   // ..
+#define a2   x[20]   // ..
+#define a3   x[21]   // ..
+#define a4   x[22]   // ..
+#define a5   x[23]   // ..
+#define a6   x[24]   // ..
+#define a7   x[25]   // ..
+#define t0   x[26]   // temporaries
+#define t1   x[27]   // ..
+#define t2   x[28]   // ..
+#define t3   x[29]   // ..
+#define t4   x[30]   // ..
+#define gp   x[31]   // global pointer
 
 // memory size 128Mb
-#define MEM_SIZE 1<<27
+#define MEM_SIZE 1<<27           // 0x0800 0000
+#define STACK_BOTTOM 0x6000000   // virtual address of stack 
 #define TRUE 1
 #define FALSE 0
 
@@ -43,6 +73,7 @@ typedef struct riscv64_memory{
 	// main memory
 	long int mem_size;
 	byte *memory;
+	byte *stack_bottom;
 
 } Riscv64_memory;
 

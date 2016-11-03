@@ -7,7 +7,7 @@ typedef unsigned int instruction;
 /*  position:  31...       y  ...   x ...  210  */
 /*                                              */
 /*  for all k if (31>=x>=k>=y>=0), bit(k) = 1,  */
-/*                       otherwise bit(k) = 0   */
+/*                      otherwise, bit(k) = 0   */
 #define ONES(x,y)        (((1<<(x+1))-1)-((1<<y)-1))
 
 /* same in all instructions */
