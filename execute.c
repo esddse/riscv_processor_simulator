@@ -119,11 +119,35 @@ void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 	riscv_decoder->rs1    = RS1(inst);
 	riscv_decoder->rs2    = RS2(inst);
 
-	// imm depends on inst's type
+	switch (opToINSTYPE(riscv_decoder->opcode))
+	{
+		case R_TYPE:
+			riscv_decoder->immediate = 0;
+			break;
+		case I_TYPE:
+			riscv_decoder->immediate = I_IMM(inst);
+			break;
+		case S_TYPE:
+			riscv_decoder->immediate = S_IMM(inst);
+			break;
+		case SB_TYPE:
+			riscv_decoder->immediate = SB_IMM(inst);
+			break;
+		case U_TYPE:
+			riscv_decoder->immediate = U_IMM(inst);
+			break;
+		case UJ_TYPE:
+			riscv_decoder->immediate = UJ_IMM(inst);
+			break;
+		default:
+			printf("error: OPCODE not defined!\n");
+			exit(1);
+	}
 
 }
 
-void execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)
+void execute(Riscv64_decoder* riscv_decoder, 
+	Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)
 {
 
 
@@ -192,10 +216,13 @@ int main(int argc, char const *argv[])
 		Elf64_Ehdr* elf_header = (Elf64_Ehdr*) buffer;
 
 		// initialize memory system
-		riscv_decoder = init_decoder(riscv_decoder);
-		riscv_register = init_register(riscv_register);
-		riscv_memory = init_memory(riscv_memory);
-
+		/* XJM modified */
+		// riscv_decoder = init_decoder(riscv_decoder);
+		// riscv_register = init_register(riscv_register);
+		// riscv_memory = init_memory(riscv_memory);
+		init_decoder(&riscv_decoder);
+		init_register(&riscv_register);
+		init_memory(&riscv_memory);
 		//load program
 		load_program(elf_header, riscv_register, riscv_memory);
 		

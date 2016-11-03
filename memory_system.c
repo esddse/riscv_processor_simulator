@@ -7,28 +7,30 @@
 /* initialization and gc                     */
 /*                                           */
 /*********************************************/
-Riscv64_decoder* init_decoder(Riscv64_decoder* riscv_decoder)
+/* XJM modified init functions below, and    */
+/* now they don't have to return a pointer   */
+/*********************************************/
+// Riscv64_decoder* init_decoder(Riscv64_decoder* riscv_decoder)
+void init_decoder(Riscv64_decoder** riscv_decoder)
 {
-	riscv_decoder = (Riscv64_decoder*) malloc (sizeof(Riscv64_decoder));
-	memset(riscv_decoder, 0, sizeof(riscv_decoder));
-	return riscv_decoder;
+	*riscv_decoder = (Riscv64_decoder*) malloc (sizeof(Riscv64_decoder));
+	memset(*riscv_decoder, 0, sizeof(riscv_decoder));
 }
 
-Riscv64_register* init_register(Riscv64_register* riscv_register)
+// Riscv64_register* init_register(Riscv64_register* riscv_register)
+void init_register(Riscv64_register** riscv_register)
 {
 	// set all registers 0 
-	riscv_register = (Riscv64_register*) malloc (sizeof(Riscv64_register));
-	memset(riscv_register, 0, sizeof(Riscv64_register));
-	return riscv_register;
+	*riscv_register = (Riscv64_register*) malloc (sizeof(Riscv64_register));
+	memset(*riscv_register, 0, sizeof(Riscv64_register));
 }
 
-Riscv64_memory* init_memory(Riscv64_memory* riscv_memory)
+// Riscv64_memory* init_memory(Riscv64_memory* riscv_memory)
+void init_memory(Riscv64_memory** riscv_memory)
 {
-	riscv_memory = (Riscv64_memory*) malloc (sizeof(Riscv64_memory));
-	riscv_memory->mem_size = MEM_SIZE;
-	riscv_memory->memory = (byte*) malloc (sizeof(byte) * riscv_memory->mem_size);
-
-	return riscv_memory;
+	*riscv_memory = (Riscv64_memory*) malloc (sizeof(Riscv64_memory));
+	(*riscv_memory)->mem_size = MEM_SIZE;
+	(*riscv_memory)->memory = (byte*) malloc (sizeof(byte) * (*riscv_memory)->mem_size);
 }
 
 void delete_memory_system(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)

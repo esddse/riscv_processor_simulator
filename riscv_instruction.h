@@ -17,7 +17,7 @@ typedef unsigned int instruction;
 #define RD(inst)         ((inst&ONES(11,7))>>7)      // 5
 #define RS1(inst)        ((inst&ONES(19,15))>>15)    // 5
 #define RS2(inst)        ((inst&ONES(24,20))>>20)    // 5
-#define IMM_SIGN(inst)   ((ins>>31)&1)               // sign of immediate
+#define IMM_SIGN(inst)   ((inst>>31)&1)               // sign of immediate
 
 
 /* --------------------   immediates  ------------------------    */
@@ -40,6 +40,8 @@ typedef unsigned int instruction;
 #define S_IMM(inst)      (((inst&ONES(11,7))>>7) | ((inst&ONES(30,25))>>20) | (IMM_SIGN(inst)*ONES(31,11))) 
 
 /* SB-type */
+/* imm[12|10:5]--rs2--rs1--funct3--imm[4:1|11]--opcode */
+/*     7----------5----5-----3-----------5--------7    */ 
 #define SB_IMM(inst)     (((inst&ONES(11,8))>>7) | ((inst&ONES(30,25))>>20) | ((inst&ONES(7,7))<<4) | (IMM_SIGN(inst)*ONES(31,12)))     
 
 /* U-type                 */
@@ -47,9 +49,10 @@ typedef unsigned int instruction;
 /*    20--------5----7    */
 #define U_IMM(inst)      (inst&ONES(31,12))  
 
-/* J-type */
-#define J_IMM(inst)      (((int&ONES(30,21))>>20) | ((inst&ONES(20,20))>>9) | (inst&ONES(19,12) | (IMM_SIGN(inst)*ONES(31,20)))  
-
 /* UJ-type */
+/* imm[20|10:1|11|19:12]--rd--opcode */ 
+#define UJ_IMM(inst)      (((inst&ONES(30,21))>>20) | ((inst&ONES(20,20))>>9) | (inst&ONES(19,12) | (IMM_SIGN(inst)*ONES(31,20))))  
 
-// same as J-type?
+/* J-type */
+
+// same as UJ-type?
