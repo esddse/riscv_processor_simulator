@@ -18,19 +18,12 @@ void init_decoder(Riscv64_decoder** riscv_decoder)
 }
 
 // Riscv64_register* init_register(Riscv64_register* riscv_register)
-<<<<<<< HEAD
 void init_register(Riscv64_register** riscv_register, Riscv64_memory* riscv_memory)
-=======
-void init_register(Riscv64_register** riscv_register)
->>>>>>> 573c4601007db82bb46e59e9a5a767c9d59ebd86
 {
 	// set all registers 0 
 	*riscv_register = (Riscv64_register*) malloc (sizeof(Riscv64_register));
 	memset(*riscv_register, 0, sizeof(Riscv64_register));
-<<<<<<< HEAD
 	(*riscv_register)->x[14] = (reg64)riscv_memory->stack_bottom; // set pc
-=======
->>>>>>> 573c4601007db82bb46e59e9a5a767c9d59ebd86
 }
 
 // Riscv64_memory* init_memory(Riscv64_memory* riscv_memory)
@@ -39,10 +32,7 @@ void init_memory(Riscv64_memory** riscv_memory)
 	*riscv_memory = (Riscv64_memory*) malloc (sizeof(Riscv64_memory));
 	(*riscv_memory)->mem_size = MEM_SIZE;
 	(*riscv_memory)->memory = (byte*) malloc (sizeof(byte) * (*riscv_memory)->mem_size);
-<<<<<<< HEAD
 	(*riscv_memory)->stack_bottom = get_actual_addr((*riscv_memory), (byte*)STACK_BOTTOM);
-=======
->>>>>>> 573c4601007db82bb46e59e9a5a767c9d59ebd86
 }
 
 void delete_memory_system(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)

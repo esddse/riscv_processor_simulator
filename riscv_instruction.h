@@ -1,7 +1,11 @@
 #include "memory_system.h"
 
 
-
+// instruction type
+typedef enum
+{
+	R_TYPE, I_TYPE, S_TYPE, SB_TYPE, U_TYPE, UJ_TYPE, NOT_DEFINED
+}INSTYPE;
 
 /* a tool, create a binary number like this :   */
 /*                                              */
@@ -19,10 +23,7 @@
 #define RD(inst)         ((inst&ONES(11,7))>>7)      // 5
 #define RS1(inst)        ((inst&ONES(19,15))>>15)    // 5
 #define RS2(inst)        ((inst&ONES(24,20))>>20)    // 5
-<<<<<<< HEAD
 #define SHAMT(inst)      ((inst&ONES(25,20))>>20)    // 6, RV64I
-=======
->>>>>>> 573c4601007db82bb46e59e9a5a767c9d59ebd86
 #define IMM_SIGN(inst)   ((inst>>31)&1)               // sign of immediate
 
 
@@ -55,13 +56,17 @@
 /*    20--------5----7    */
 #define U_IMM(inst)      (inst&ONES(31,12))  
 
-<<<<<<< HEAD
+
 /* J-type */
 #define J_IMM(inst)      (((inst&ONES(30,21))>>20) | ((inst&ONES(20,20))>>9) | (inst&ONES(19,12)) | (IMM_SIGN(inst)*ONES(31,20)))  
 
 /* UJ-type */
 #define UJ_IMM(inst)      (((inst&ONES(30,21))>>20) | ((inst&ONES(20,20))>>9) | (inst&ONES(19,12)) | (IMM_SIGN(inst)*ONES(31,20))) 
 // same as J-type?
+
+
+// return the instruction tyoe according to the opcode
+INSTYPE opToINSTYPE(int op);
 
 
 
@@ -154,12 +159,3 @@ void srlw(Riscv64_register*, int rd, int rs1, int rs2);
 void srliw(Riscv64_register*, int rd, int rs1, int shamt);
 void sraw(Riscv64_register*, int rd, int rs1, int rs2);
 void sraiw(Riscv64_register*, int rd, int rs1, int shamt);
-=======
-/* UJ-type */
-/* imm[20|10:1|11|19:12]--rd--opcode */ 
-#define UJ_IMM(inst)      (((inst&ONES(30,21))>>20) | ((inst&ONES(20,20))>>9) | (inst&ONES(19,12) | (IMM_SIGN(inst)*ONES(31,20))))  
-
-/* J-type */
-
-// same as UJ-type?
->>>>>>> 573c4601007db82bb46e59e9a5a767c9d59ebd86
