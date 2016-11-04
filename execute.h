@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "parse_elf.h"
-#include "memory_system.h"
 #include "riscv_instruction.h"
+#include "instruction_def.h"
 
 #define GET_ARRAY_LEN(array) (sizeof(array) / sizeof(array[0]))  // get the length of an array
 

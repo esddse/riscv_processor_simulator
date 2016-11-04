@@ -80,6 +80,8 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 			set_register_pc(riscv_register, (reg64)program_header->p_vaddr);
 		}
 
+		printf("%x\n", *(instruction*)p_seg_actual_addr);
+
 	}
 /*
 	// section
@@ -112,28 +114,51 @@ instruction fetch(Riscv64_memory* riscv_memory, Riscv64_register* riscv_register
 
 void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 {
-	riscv_decoder->opcode = OPCODE(inst);
-	riscv_decoder->funct3 = FUNCT3(inst);
-	riscv_decoder->funct7 = FUNCT7(inst);
-	riscv_decoder->rd     = RD(inst);
-	riscv_decoder->rs1    = RS1(inst);
-	riscv_decoder->rs2    = RS2(inst);
+	riscv_decoder->opcode       = OPCODE(inst);
+	riscv_decoder->funct3       = FUNCT3(inst);
+	riscv_decoder->funct7       = FUNCT7(inst);
+	riscv_decoder->rd           = RD(inst);
+	riscv_decoder->rs1          = RS1(inst);
+	riscv_decoder->rs2          = RS2(inst);
+	riscv_decoder->shamt        = SHAMT(inst);
+	riscv_decoder->I_immediate  = I_IMM(inst);
+	riscv_decoder->S_immediate  = S_IMM(inst);
+	riscv_decoder->SB_immediate = SB_IMM(inst);
+	riscv_decoder->U_immediate  = U_IMM(inst);
+	riscv_decoder->UJ_immediate = UJ_IMM(inst);
 
-	// imm depends on inst's type
-
+	printf("opcode = %x\n", riscv_decoder->opcode);
+	return;
 }
 
-void execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)
+void execute(Riscv64_decoder* riscv_decoder, 
+	Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)
 {
-
-
-
-
-	   // execute according to the decoder
-
-
-
-
+	// classification by opcode
+	switch (opToINSTYPE(riscv_decoder->opcode))
+	{
+		case R_TYPE:
+		
+			break;
+		case I_TYPE:
+			
+			break;
+		case S_TYPE:
+			
+			break;
+		case SB_TYPE:
+			
+			break;
+		case U_TYPE:
+			
+			break;
+		case UJ_TYPE:
+			
+			break;
+		default:
+			printf("error: OPCODE not defined!\n");
+			exit(1);
+	}
 }
 
 
@@ -192,15 +217,19 @@ int main(int argc, char const *argv[])
 		Elf64_Ehdr* elf_header = (Elf64_Ehdr*) buffer;
 
 		// initialize memory system
-		riscv_decoder = init_decoder(riscv_decoder);
-		riscv_register = init_register(riscv_register);
-		riscv_memory = init_memory(riscv_memory);
-
+		/* XJM modified */
+		// riscv_decoder = init_decoder(riscv_decoder);
+		// riscv_register = init_register(riscv_register);
+		// riscv_memory = init_memory(riscv_memory);
+		init_decoder(&riscv_decoder);
+		init_memory(&riscv_memory);
+		init_register(&riscv_register, riscv_memory);
+		
 		//load program
 		load_program(elf_header, riscv_register, riscv_memory);
 		
-		int i = 1;
-		while(i--)
+		int j = 1;
+		while(j--)
 		{
 			instruction inst = fetch(riscv_memory, riscv_register);
 			decode(riscv_decoder, inst);

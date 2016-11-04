@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "riscv_instruction.h"
+
 
 typedef unsigned char      reg8;
 typedef unsigned short int reg16;
@@ -10,39 +10,10 @@ typedef unsigned long int  reg64;
 
 typedef unsigned char bool;
 typedef unsigned char byte;
-// some alias 
-#define zero x[0]    // hard-wired zero
-#define ra   x[1]    // return address
-#define s0   x[2]    // saved register
-#define fp   x[2]    // frame pointer
-#define s1   x[3]    // saved register
-#define s2   x[4]    // ..
-#define s3   x[5]    // .. 
-#define s4   x[6]    // ..
-#define s5   x[7]    // ..
-#define s6   x[8]    // ..
-#define s7   x[9]    // ..
-#define s8   x[10]   // ..
-#define s9   x[11]   // ..
-#define s10  x[12]   // ..
-#define s11  x[13]   // ..
+typedef unsigned int instruction;
+
+// abi alias 
 #define sp   x[14]   // stack pointer
-#define tp   x[15]   // thread pointer
-#define v0   x[16]   // return values
-#define v1   x[17]   // ..
-#define a0   x[18]   // function arguments
-#define a1   x[19]   // ..
-#define a2   x[20]   // ..
-#define a3   x[21]   // ..
-#define a4   x[22]   // ..
-#define a5   x[23]   // ..
-#define a6   x[24]   // ..
-#define a7   x[25]   // ..
-#define t0   x[26]   // temporaries
-#define t1   x[27]   // ..
-#define t2   x[28]   // ..
-#define t3   x[29]   // ..
-#define t4   x[30]   // ..
 #define gp   x[31]   // global pointer
 
 // memory size 128Mb
@@ -59,9 +30,49 @@ typedef struct riscv64_decoder{
 	int rd;
 	int rs1;
 	int rs2;
-	int immediate;
+	int shamt;
+	int I_immediate;
+	int S_immediate;
+	int SB_immediate;
+	int U_immediate;
+	int UJ_immediate;
 } Riscv64_decoder;
 
+
+/*
+	x[0]    zero    Hard-wired zero
+	x[1]    ra      Return address
+	x[2]    s0/fp   Saved register/frame pointer 
+	x[3]    s1      Saved registers
+	x[4]    s2      ..
+	x[5]    s3      ..
+	x[6]    s4      ..
+	x[7]    s5      ..
+	x[8]    s6      ..
+	x[9]    s7      ..
+	x[10]   s8      ..
+	x[11]   s9      ..
+	x[12]   s10     ..
+	x[13]   s11     ..
+	x[14]   sp      Stack pointer
+	x[15]   tp      Thread pointer
+	x[16]   v0      Return values
+	x[17]   v1      ..
+	x[18]   a0      Function arguments
+	x[19]   a1      ..
+	x[20]   a2      ..
+	x[21]   a3      ..
+	x[22]   a4      ..
+	x[23]   a5      ..
+	x[24]   a6      ..
+	x[25]   a7      ..
+	x[26]   t0      Temporaries
+	x[27]   t1      ..
+	x[28]   t2      ..
+	x[29]   t3      .. 
+	x[30]   t4      ..
+	x[31]   gp      Global pointer
+*/
 // register file
 typedef struct riscv64_register{
 	reg64 pc;
@@ -83,9 +94,9 @@ typedef struct riscv64_memory{
 /* initialization and gc                     */
 /*                                           */
 /*********************************************/
-Riscv64_decoder* init_decoder(Riscv64_decoder*);
-Riscv64_register* init_register(Riscv64_register*);
-Riscv64_memory* init_memory(Riscv64_memory*);
+void init_decoder(Riscv64_decoder**);
+void init_memory(Riscv64_memory**);
+void init_register(Riscv64_register**, Riscv64_memory*);
 void delete_memory_system(Riscv64_decoder*, Riscv64_register*, Riscv64_memory*); // free the memory 
 
 /*********************************************/
