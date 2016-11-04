@@ -61,5 +61,9 @@ typedef struct elf64_sym{
    unsigned char st_other; 
    Elf64_Half    st_shndx;    
    Elf64_Addr    st_value;  
+<<<<<<< HEAD
    Elf64_Xword   st_size;  
+=======
+   Elf64_Xword    st_size;  
+>>>>>>> 573c4601007db82bb46e59e9a5a767c9d59ebd86
 } Elf64_Sym;  

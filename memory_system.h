@@ -94,9 +94,18 @@ typedef struct riscv64_memory{
 /* initialization and gc                     */
 /*                                           */
 /*********************************************/
+<<<<<<< HEAD
 void init_decoder(Riscv64_decoder**);
 void init_memory(Riscv64_memory**);
 void init_register(Riscv64_register**, Riscv64_memory*);
+=======
+// Riscv64_decoder* init_decoder(Riscv64_decoder*);
+// Riscv64_register* init_register(Riscv64_register*);
+// Riscv64_memory* init_memory(Riscv64_memory*);
+void init_decoder(Riscv64_decoder**);
+void init_register(Riscv64_register**);
+void init_memory(Riscv64_memory**);
+>>>>>>> 573c4601007db82bb46e59e9a5a767c9d59ebd86
 void delete_memory_system(Riscv64_decoder*, Riscv64_register*, Riscv64_memory*); // free the memory 
 
 /*********************************************/

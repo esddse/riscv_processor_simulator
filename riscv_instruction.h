@@ -19,7 +19,10 @@
 #define RD(inst)         ((inst&ONES(11,7))>>7)      // 5
 #define RS1(inst)        ((inst&ONES(19,15))>>15)    // 5
 #define RS2(inst)        ((inst&ONES(24,20))>>20)    // 5
+<<<<<<< HEAD
 #define SHAMT(inst)      ((inst&ONES(25,20))>>20)    // 6, RV64I
+=======
+>>>>>>> 573c4601007db82bb46e59e9a5a767c9d59ebd86
 #define IMM_SIGN(inst)   ((inst>>31)&1)               // sign of immediate
 
 
@@ -43,6 +46,8 @@
 #define S_IMM(inst)      (((inst&ONES(11,7))>>7) | ((inst&ONES(30,25))>>20) | (IMM_SIGN(inst)*ONES(31,11))) 
 
 /* SB-type */
+/* imm[12|10:5]--rs2--rs1--funct3--imm[4:1|11]--opcode */
+/*     7----------5----5-----3-----------5--------7    */ 
 #define SB_IMM(inst)     (((inst&ONES(11,8))>>7) | ((inst&ONES(30,25))>>20) | ((inst&ONES(7,7))<<4) | (IMM_SIGN(inst)*ONES(31,12)))     
 
 /* U-type                 */
@@ -50,6 +55,7 @@
 /*    20--------5----7    */
 #define U_IMM(inst)      (inst&ONES(31,12))  
 
+<<<<<<< HEAD
 /* J-type */
 #define J_IMM(inst)      (((inst&ONES(30,21))>>20) | ((inst&ONES(20,20))>>9) | (inst&ONES(19,12)) | (IMM_SIGN(inst)*ONES(31,20)))  
 
@@ -148,3 +154,12 @@ void srlw(Riscv64_register*, int rd, int rs1, int rs2);
 void srliw(Riscv64_register*, int rd, int rs1, int shamt);
 void sraw(Riscv64_register*, int rd, int rs1, int rs2);
 void sraiw(Riscv64_register*, int rd, int rs1, int shamt);
+=======
+/* UJ-type */
+/* imm[20|10:1|11|19:12]--rd--opcode */ 
+#define UJ_IMM(inst)      (((inst&ONES(30,21))>>20) | ((inst&ONES(20,20))>>9) | (inst&ONES(19,12) | (IMM_SIGN(inst)*ONES(31,20))))  
+
+/* J-type */
+
+// same as UJ-type?
+>>>>>>> 573c4601007db82bb46e59e9a5a767c9d59ebd86

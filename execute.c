@@ -114,6 +114,7 @@ instruction fetch(Riscv64_memory* riscv_memory, Riscv64_register* riscv_register
 
 void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 {
+<<<<<<< HEAD
 	riscv_decoder->opcode       = OPCODE(inst);
 	riscv_decoder->funct3       = FUNCT3(inst);
 	riscv_decoder->funct7       = FUNCT7(inst);
@@ -129,6 +130,40 @@ void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 
 	printf("opcode = %x\n", riscv_decoder->opcode);
 	return;
+=======
+	riscv_decoder->opcode = OPCODE(inst);
+	riscv_decoder->funct3 = FUNCT3(inst);
+	riscv_decoder->funct7 = FUNCT7(inst);
+	riscv_decoder->rd     = RD(inst);
+	riscv_decoder->rs1    = RS1(inst);
+	riscv_decoder->rs2    = RS2(inst);
+
+	switch (opToINSTYPE(riscv_decoder->opcode))
+	{
+		case R_TYPE:
+			riscv_decoder->immediate = 0;
+			break;
+		case I_TYPE:
+			riscv_decoder->immediate = I_IMM(inst);
+			break;
+		case S_TYPE:
+			riscv_decoder->immediate = S_IMM(inst);
+			break;
+		case SB_TYPE:
+			riscv_decoder->immediate = SB_IMM(inst);
+			break;
+		case U_TYPE:
+			riscv_decoder->immediate = U_IMM(inst);
+			break;
+		case UJ_TYPE:
+			riscv_decoder->immediate = UJ_IMM(inst);
+			break;
+		default:
+			printf("error: OPCODE not defined!\n");
+			exit(1);
+	}
+
+>>>>>>> 573c4601007db82bb46e59e9a5a767c9d59ebd86
 }
 
 void execute(Riscv64_decoder* riscv_decoder, 
@@ -222,9 +257,14 @@ int main(int argc, char const *argv[])
 		// riscv_register = init_register(riscv_register);
 		// riscv_memory = init_memory(riscv_memory);
 		init_decoder(&riscv_decoder);
+<<<<<<< HEAD
 		init_memory(&riscv_memory);
 		init_register(&riscv_register, riscv_memory);
 		
+=======
+		init_register(&riscv_register);
+		init_memory(&riscv_memory);
+>>>>>>> 573c4601007db82bb46e59e9a5a767c9d59ebd86
 		//load program
 		load_program(elf_header, riscv_register, riscv_memory);
 		
