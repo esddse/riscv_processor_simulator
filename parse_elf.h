@@ -29,7 +29,7 @@ typedef struct elf64_hdr{
 } Elf64_Ehdr;
 
 // Section header
-typedef struct {
+typedef struct elf64_shdr{
    Elf64_Word    sh_name;	    /* name of section, index */
    Elf64_Word    sh_type;	
    Elf64_Xword   sh_flags;
@@ -61,5 +61,5 @@ typedef struct elf64_sym{
    unsigned char st_other; 
    Elf64_Half    st_shndx;    
    Elf64_Addr    st_value;  
-   Elf64_Xword    st_size;  
+   Elf64_Xword   st_size;  
 } Elf64_Sym;  
