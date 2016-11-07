@@ -11,7 +11,9 @@
 	hello.c：包括printf
 	test.c：包括一个初始化的全局变量和一个未初始化的全局变量
 
-编译方式: gcc -o -std=c99 simulator memory_system.c execute.c
+
+编译方式: gcc -std=c99 -o simulator memory_system.c riscv_instruction.c execute.c
+
 
 运行方式: ./simulator test hello  (可以支持多个程序顺序执行)
 
