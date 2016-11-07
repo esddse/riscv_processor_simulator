@@ -42,7 +42,7 @@ byte* read_file(FILE* fp, int* p_size)
 	{
 		printf("Memory error.\n");
 		exit(1);
-	}  
+	}
 
 	// read
 	fread(buffer, 1, *p_size, fp);
@@ -50,12 +50,12 @@ byte* read_file(FILE* fp, int* p_size)
 	return buffer;
 }
 
-// load the program to the memory system 
+// load the program to the memory system
 void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)
 {
 	// set PC
 	riscv_register->pc = elf_header->e_entry;
-	
+
 	// load program segment to the memory
 	Elf64_Phdr* program_header_1 = (Elf64_Phdr*)((byte*)elf_header + elf_header->e_phoff);
 	int ph_size = elf_header->e_phentsize;
@@ -66,12 +66,12 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 	for(int i = 0; i < ph_num; i++)
 	{
 		Elf64_Phdr* program_header = (Elf64_Phdr*)((byte*)program_header_1 + ph_size*i);
-		
+
 		// pointer to segment in the file
 		byte* p_seg_in_file = (byte*)elf_header + program_header->p_offset;
-		// pointer to segment in the virtual memory 
+		// pointer to segment in the virtual memory
 		byte* p_seg_actual_addr = get_actual_addr(riscv_memory, (byte*)program_header->p_vaddr);
-		
+
 		// copy the segment to virtual memory
 		memcpy(p_seg_actual_addr, p_seg_in_file, program_header->p_memsz);
 		// set pc to head of the 1st seg
@@ -131,33 +131,34 @@ void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 	return;
 }
 
-void execute(Riscv64_decoder* riscv_decoder, 
+
+void execute(Riscv64_decoder* riscv_decoder,
 	Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)
 {
 	// classification by opcode
-	switch (opToINSTYPE(riscv_decoder->opcode))
+	switch (GetINSTYPE(riscv_decoder))
 	{
 		case R_TYPE:
-		
+			R_execute(riscv_decoder, riscv_register, riscv_memory);
 			break;
 		case I_TYPE:
-			
+			I_execute(riscv_decoder, riscv_register, riscv_memory);
 			break;
 		case S_TYPE:
-			
+			S_execute(riscv_decoder, riscv_register, riscv_memory);
 			break;
 		case SB_TYPE:
-			
+			SB_execute(riscv_decoder, riscv_register, riscv_memory);
 			break;
 		case U_TYPE:
-			
+			U_execute(riscv_decoder, riscv_register, riscv_memory);
 			break;
 		case UJ_TYPE:
-			
+			UJ_execute(riscv_decoder, riscv_register, riscv_memory);
 			break;
 		default:
 			printf("error: OPCODE not defined!\n");
-			exit(1);
+			Error_NoDef(riscv_decoder);
 	}
 }
 
@@ -178,14 +179,14 @@ int main(int argc, char const *argv[])
 	}
 
 	int file_num = argc - 1; // number of file
-	FILE *fp;  // file pointer 
+	FILE *fp;  // file pointer
 
 	// memory system
 	Riscv64_register *riscv_register;
 	Riscv64_memory *riscv_memory;
 	Riscv64_decoder *riscv_decoder;
 
-	// execute elf one by one 
+	// execute elf one by one
 	for (int i = 1; i <= file_num; i++ )
 	{
 		char *file_name = argv[i];
@@ -207,13 +208,13 @@ int main(int argc, char const *argv[])
 		}
 
 		printf("executing file : %s ...\n", file_name);
-		
+
 		// read the whole elf
 		int size;
 		byte* buffer = read_file(fp, &size);
 		printf("the size of the file is : %d bytes\n", size);
 
-		// get the elf header 
+		// get the elf header
 		Elf64_Ehdr* elf_header = (Elf64_Ehdr*) buffer;
 
 		// initialize memory system
@@ -224,10 +225,11 @@ int main(int argc, char const *argv[])
 		init_decoder(&riscv_decoder);
 		init_memory(&riscv_memory);
 		init_register(&riscv_register, riscv_memory);
-		
+
+
 		//load program
 		load_program(elf_header, riscv_register, riscv_memory);
-		
+
 		int j = 1;
 		while(j--)
 		{
