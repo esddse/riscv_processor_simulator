@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 typedef unsigned char      reg8;
@@ -12,9 +13,40 @@ typedef unsigned char bool;
 typedef unsigned char byte;
 typedef unsigned int instruction;
 
-// abi alias 
-#define sp   x[14]   // stack pointer
-#define gp   x[31]   // global pointer
+// abi 
+#define zero x[0]    // Hard-wired zero
+#define ra   x[1]    // return address
+#define sp   x[2]    // stack pointer
+#define gp   x[3]    // global pointer
+#define tp   x[4]    // thread pointer
+#define t0   x[5]    // temporaries
+#define t1   x[6]    // ..
+#define t2   x[7]    // ..
+#define s0   x[8]    // saved register
+#define fp   x[8]    // frame pointer
+#define s1   x[9]    // saved register
+#define a0   x[10]   // function argument/return value
+#define a1   x[11]   // function argument/return value
+#define a2   x[12]   // function argument
+#define a3   x[13]   // ..
+#define a4   x[14]   // ..
+#define a5   x[15]   // ..
+#define a6   x[16]   // ..
+#define a7   x[17]   // ..
+#define s2   x[18]   // saved register
+#define s3   x[19]   // ..
+#define s4   x[20]   // ..
+#define s5   x[21]   // ..
+#define s6   x[22]   // ..
+#define s7   x[23]   // ..
+#define s8   x[24]   // ..
+#define s9   x[25]   // ..
+#define s10  x[26]   // ..
+#define s11  x[27]   // ..
+#define t3   x[28]   // temporaries
+#define t4   x[29]   // ..
+#define t5   x[30]   // ..
+#define t6   x[31]   // ..
 
 // memory size 128Mb
 #define MEM_SIZE 1<<27           // 0x0800 0000
@@ -24,6 +56,7 @@ typedef unsigned int instruction;
 
 // decoder
 typedef struct riscv64_decoder{
+	instruction inst;
 	int opcode;
 	int funct3;
 	int funct7;
@@ -36,47 +69,25 @@ typedef struct riscv64_decoder{
 	int SB_immediate;
 	int U_immediate;
 	int UJ_immediate;
+	// floating-point
+	int csr;
+	int funct5;
+	int funct2;
+	int fmt;
+	int rm;
+	int rs3;
+	int width;
 } Riscv64_decoder;
 
 
-/*
-	x[0]    zero    Hard-wired zero
-	x[1]    ra      Return address
-	x[2]    s0/fp   Saved register/frame pointer 
-	x[3]    s1      Saved registers
-	x[4]    s2      ..
-	x[5]    s3      ..
-	x[6]    s4      ..
-	x[7]    s5      ..
-	x[8]    s6      ..
-	x[9]    s7      ..
-	x[10]   s8      ..
-	x[11]   s9      ..
-	x[12]   s10     ..
-	x[13]   s11     ..
-	x[14]   sp      Stack pointer
-	x[15]   tp      Thread pointer
-	x[16]   v0      Return values
-	x[17]   v1      ..
-	x[18]   a0      Function arguments
-	x[19]   a1      ..
-	x[20]   a2      ..
-	x[21]   a3      ..
-	x[22]   a4      ..
-	x[23]   a5      ..
-	x[24]   a6      ..
-	x[25]   a7      ..
-	x[26]   t0      Temporaries
-	x[27]   t1      ..
-	x[28]   t2      ..
-	x[29]   t3      .. 
-	x[30]   t4      ..
-	x[31]   gp      Global pointer
-*/
 // register file
 typedef struct riscv64_register{
+	// integer
 	reg64 pc;
 	reg64 x[32];
+	// floating point
+	reg64 fcsr;
+	reg64 f[32];
 } Riscv64_register;
 
 // memory
@@ -138,10 +149,17 @@ reg64 get_memory_reg64(Riscv64_memory*, byte* virtual_addr);
 /* functions for register file               */
 /*                                           */
 /*********************************************/
+/* integer */
 void set_register_pc(Riscv64_register*, reg64 value); // set pc
 reg64 get_register_pc(Riscv64_register*); // get a 64-bit value from pc
 
 void set_register_general(Riscv64_register*, int index, reg64 value); // set general register x[index]
 reg64 get_register_general(Riscv64_register*, int index); // get a 64-bit value from x[index]
-
 void register_pc_self_increase(Riscv64_register*); // pc self-increase the the next instruction
+
+/* floating point */
+void set_register_fcsr(Riscv64_register*, reg64 value); // set fcsr (64-bit needed)
+reg64 get_register_fcsr(Riscv64_register*); // get a 64-bit value from fcsr
+
+void set_register_fp(Riscv64_register*, int index, reg64 value);// set floating-point register f[index] = value (64-bit needed)
+reg64 get_register_fp(Riscv64_register*, int index); // get a 64-bit value from floating-pointer register f[index]

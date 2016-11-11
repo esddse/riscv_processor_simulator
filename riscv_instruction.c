@@ -1,10 +1,11 @@
+
 #include "riscv_instruction.h"
 
 
 void Error_NoDef(Riscv64_decoder* riscv_decoder)
 {
-	printf("Instruction not defined: opcode(%d), funct3(%d), funct7(%d)\n",
-	        riscv_decoder->opcode, riscv_decoder->funct3, riscv_decoder->funct7);
+	printf("Instruction %x not defined: opcode(%d), funct3(%d), funct7(%d)\n",
+	        riscv_decoder->inst, riscv_decoder->opcode, riscv_decoder->funct3, riscv_decoder->funct7);
 	exit(1);
 }
 // return the instuction type according to the opcode
@@ -13,14 +14,23 @@ INSTYPE GetINSTYPE(Riscv64_decoder* riscv_decoder)
 	switch(riscv_decoder->opcode)
 	{
 		case 0x33: // b0110011
+		case 0x53: // b1010011 fp
 			return R_TYPE;
+
+		case 0x43: // b1000011 fp
+		case 0x47: // b1000111 fp
+		case 0x4b: // b1001011 fp
+		case 0x4f: // b1001111 fp
+			return R4_TYPE; 
 
 		case 0x67: // b1100111
 		case 0x03: // b0000011
 		case 0x73: // b1110011
+		case 0x07: // b0000111 fp
 			return I_TYPE;
 
 		case 0x23: // b0100011
+		case 0x27: // b0100111 fp
 			return S_TYPE;
 
 		case 0x63: // b1100011
@@ -152,6 +162,158 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					Error_NoDef(riscv_decoder);
 			}
 			break;
+		case 0x53: // b1010011 fp
+			switch(riscv_decoder->funct7)
+			{
+				case 0x00: // b0000000 fadd_S
+					fadd_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 0x01: // b0000001 fadd_D
+					fadd_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 0x04: // b0000100 fsub_S
+					fsub_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 0x05: // b0000101 fsub_D
+					fsub_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 0x08: // b0001000 fmul_S
+					fmul_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 0x09: // b0001001 fnum_D
+					fmul_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 0x0c: // b0001100 fdiv_S
+					fdiv_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 0x0d: // b0001101 fdiv_D
+					fdiv_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 0x2c: // b0101100 fsqrt_S
+					fsqrt_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 0x2d: // b0101101 fsqrt_D
+					fsqrt_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 0x14: // b0010100
+					switch(riscv_decoder->funct3)
+					{
+						case 0: // b000 fmin_S
+							fmin_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 1: // b001 fmax_S
+							fmax_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						default:
+							Error_NoDef(riscv_decoder);
+					}
+					break;
+				case 0x15: // b0010101
+					switch(riscv_decoder->funct3)
+					{
+						case 0: // b000 fmin_D
+							fmin_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 1: // b001 fmax_D
+							fmax_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						default:
+							Error_NoDef(riscv_decoder);
+					}
+					break;
+				case 0x20: // b0100000
+					fcvt_S_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+					break;
+				case 0x21: // b0100001
+					fcvt_D_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+					break;
+				case 0x50: // b1010000
+					switch(riscv_decoder->funct3)
+					{
+						case 0: // b000 fle_S
+							fle_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 1: // b001 flt_S
+							flt_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 2: // b010 feq_S
+							feq_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						default:
+							Error_NoDef(riscv_decoder);
+					}
+					break;
+				case 0x51: // b1010001
+					switch(riscv_decoder->funct3)
+					{
+						case 0: // b000 fle_D
+							fle_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 1: // b001 flt_D
+							flt_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 2: // b010 feq_D
+							feq_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						default:
+							Error_NoDef(riscv_decoder);
+					}
+					break;
+				case 0x60: // b1100000
+					switch(riscv_decoder->rs2)
+					{
+						case 0: // b00000 fcvt_W_S
+							fcvt_W_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+							break;
+						case 1: // b00001 fcvt_WU_S
+							fcvt_WU_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+							break;
+						default:
+							Error_NoDef(riscv_decoder);
+					}
+					break;
+				case 0x61: // b1100001
+					switch(riscv_decoder->rs2)
+					{
+						case 0: // b00000 fcvt_W_D
+							fcvt_W_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+							break;
+						case 1: // b00001 fcvt_WU_D
+							fcvt_WU_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+							break;
+						default:
+							Error_NoDef(riscv_decoder);
+					}
+					break;
+				case 0x68: // b1101000
+					switch(riscv_decoder->rs2)
+					{
+						case 0: // b00000 fcvt_S_W
+							fcvt_S_W(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+							break;
+						case 1: // b00001 fcvt_S_WU
+							fcvt_S_WU(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+							break;
+						default:
+							Error_NoDef(riscv_decoder);
+					}
+					break;
+				case 0x69: // b1101001
+					switch(riscv_decoder->rs2)
+					{
+						case 0: // b00000 fcvt_D_W
+							fcvt_D_W(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+							break;
+						case 1: // b00001 fcvt_D_WU
+							fcvt_D_WU(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+							break;
+						default:
+							Error_NoDef(riscv_decoder);
+					}
+					break;
+				default:
+					Error_NoDef(riscv_decoder);
+			}
 		case 0x13: // b0010011
 			switch(riscv_decoder->funct3)
 			{
@@ -182,6 +344,67 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					Error_NoDef(riscv_decoder);
 			}
 			break;
+		default:
+			Error_NoDef(riscv_decoder);
+	}
+}
+// execute R4_TYPE instructions
+void R4_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)
+{
+	switch(riscv_decoder->opcode)
+	{
+		case 0x43: // b1000011 fp
+			switch(riscv_decoder->funct2)
+			{
+				case 0: // b00
+					fmadd_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->rs3);
+					break;
+				case 1: // b01
+					fmadd_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->rs3);
+					break;
+				default:
+					Error_NoDef(riscv_decoder);
+			}
+			break;	
+		case 0x47: // b1000111 fp
+			switch(riscv_decoder->funct2)
+			{
+				case 0: // b00
+					fmsub_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->rs3);
+					break;
+				case 1: // b01
+					fmsub_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->rs3);
+					break;
+				default:
+					Error_NoDef(riscv_decoder);
+			}
+			break;	
+		case 0x4b: // b1001011 fp
+			switch(riscv_decoder->funct2)
+			{
+				case 0: // b00
+					fnmsub_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->rs3);
+					break;
+				case 1: // b01
+					fnmsub_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->rs3);
+					break;
+				default:
+					Error_NoDef(riscv_decoder);
+			}
+			break;	
+		case 0x4f: // b1001111 fp
+			switch(riscv_decoder->funct2)
+			{
+				case 0: // b00
+					fnmadd_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->rs3);
+					break;
+				case 1: // b01
+					fnmadd_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->rs3);
+					break;
+				default:
+					Error_NoDef(riscv_decoder);
+			}
+			break;	
 		default:
 			Error_NoDef(riscv_decoder);
 	}
@@ -256,6 +479,19 @@ void I_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					Error_NoDef(riscv_decoder);
 			}
 			break;
+		case 0x07: // b0000111
+			switch(riscv_decoder->funct3)
+			{
+				case 2: // b010 flw
+					flw(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					break;
+				case 3: // b011 fld
+					fld(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					break;
+				default:
+					Error_NoDef(riscv_decoder);
+			}
+			break;
 		default:
 			Error_NoDef(riscv_decoder);
 	}
@@ -281,6 +517,18 @@ void S_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					Error_NoDef(riscv_decoder);
 			}
 			break;
+		case 0x27:
+			switch(riscv_decoder->funct3)
+			{
+				case 2: // b010 fsw
+					flw(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->S_immediate);
+					break;
+				case 3: // b011 fsd
+					fsd(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->S_immediate);
+					break;
+				default:
+					Error_NoDef(riscv_decoder);
+			}
 		default:
 			Error_NoDef(riscv_decoder);
 	}
@@ -352,7 +600,7 @@ void UJ_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register
 /* functions for instructions  RV32I base    */
 /*                                           */
 /*********************************************/
-/* @param rd,rrs1,rrs2 stand for the index of a register */
+/* @param rd,rs1,rs2 stand for the index of a register */
 
 /* Loads */
 void lb(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd, int rs1, int imm)  // byte
@@ -410,7 +658,6 @@ void sw(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rs1,
 void add(Riscv64_register* riscv_register, int rd, int rs1, int rs2)               // add
 {
 	riscv_register->x[rd] = riscv_register->x[rs1] + riscv_register->x[rs2];
-	return;
 }
 
 void addi(Riscv64_register* riscv_register, int rd, int rs1, int imm)              // add immediate
@@ -590,7 +837,7 @@ void jalr(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd
 
 /* System */
 void scall()
-{}
+{exit(1);}
 
 /*********************************************/
 /*                                           */
@@ -617,3 +864,310 @@ void srlw(Riscv64_register* riscv_register, int rd, int rs1, int rs2);
 void srliw(Riscv64_register* riscv_register, int rd, int rs1, int shamt);
 void sraw(Riscv64_register* riscv_register, int rd, int rs1, int rs2);
 void sraiw(Riscv64_register* riscv_register, int rd, int rs1, int shamt);
+
+
+
+/*********************************************/
+/*                                           */
+/* functions for instructions RV32F          */
+/*                                           */
+/*********************************************/
+
+/* Load */
+void flw(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd, int rs1, int imm)
+{
+	reg64 reg_value = get_register_general(riscv_register, rs1);
+	reg32 load_value = get_memory_reg32(riscv_memory, (byte*)(reg_value + imm));
+	set_register_fp(riscv_register, rd, (unsigned long int)load_value);
+}
+
+/* Store */
+void fsw(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rs1, int rs2, int imm)
+{
+	reg64 reg_value = get_register_general(riscv_register, rs1);
+	reg32 store_value = get_memory_reg32(riscv_memory, (byte*)(unsigned long int)rs2);
+	set_memory_reg32(riscv_memory, (byte*)(reg_value + imm), store_value);
+}
+
+/* Arithmetics */
+void fadd_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	float temp = *((float*)&riscv_register->f[rs1]) + *((float*)&riscv_register->f[rs2]);
+	riscv_register->f[rd] = (reg64)(*(unsigned int*)&temp);
+}
+void fsub_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	float temp = *((float*)&riscv_register->f[rs1]) - *((float*)&riscv_register->f[rs2]);
+	riscv_register->f[rd] = (reg64)(*(unsigned int*)&temp);
+}
+void fmul_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	float temp = *((float*)&riscv_register->f[rs1]) * *((float*)&riscv_register->f[rs2]);
+	riscv_register->f[rd] = (reg64)(*(unsigned int*)&temp);
+}
+void fdiv_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	float temp = *((float*)&riscv_register->f[rs1]) / *((float*)&riscv_register->f[rs2]);
+	riscv_register->f[rd] = (reg64)(*(unsigned int*)&temp);
+}
+void fmin_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	float temp = MIN(*((float*)&riscv_register->f[rs1]), *((float*)&riscv_register->f[rs2]));
+	riscv_register->f[rd] = (reg64)(*(unsigned int*)&temp);
+}
+void fmax_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	float temp = MAX(*((float*)&riscv_register->f[rs1]), *((float*)&riscv_register->f[rs2]));
+	riscv_register->f[rd] = (reg64)(*(unsigned int*)&temp);
+}
+void fsqrt_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	float temp = sqrt(*((float*)&riscv_register->f[rs1]));
+	riscv_register->f[rd] = (reg64)(*(unsigned int*)&temp);
+}
+
+void fmadd_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2, int rs3)  // rs1*rs2+rs3
+{
+	float temp = *((float*)&riscv_register->f[rs1]) * *((float*)&riscv_register->f[rs2]) + *((float*)&riscv_register->f[rs3]);
+	riscv_register->f[rd] = (reg64)(*(unsigned int*)&temp);
+}
+void fmsub_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2, int rs3)  // rs1*rs2-rs3
+{
+	float temp = *((float*)&riscv_register->f[rs1]) * *((float*)&riscv_register->f[rs2]) - *((float*)&riscv_register->f[rs3]);
+	riscv_register->f[rd] = (reg64)(*(unsigned int*)&temp);
+}
+void fnmadd_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2, int rs3) // -(rs1*rs2+rs3)
+{
+	float temp = -(*((float*)&riscv_register->f[rs1]) * *((float*)&riscv_register->f[rs2]) + *((float*)&riscv_register->f[rs3]));
+	riscv_register->f[rd] = (reg64)(*(unsigned int*)&temp);
+}
+void fnmsub_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2, int rs3) // -(rs1*rs2-rs3)
+{
+	float temp = -(*((float*)&riscv_register->f[rs1]) * *((float*)&riscv_register->f[rs2]) - *((float*)&riscv_register->f[rs3]));
+	riscv_register->f[rd] = (reg64)(*(unsigned int*)&temp);
+}
+
+/* Type Conversion */
+void fcvt_W_S(Riscv64_register* riscv_register, int rd, int rs1)  // single-precision fp   -> signed word(32-bit)
+{
+	reg64 src_reg64 = get_register_fp(riscv_register, rs1);
+	float src_float = *((float*)&src_reg64);
+	int dest_int = (int)src_float;  
+	set_register_general(riscv_register, rd, (long int)dest_int);
+}
+void fcvt_WU_S(Riscv64_register* riscv_register, int rd, int rs1) // single-precision fp   -> unsigned word(32-bit)
+{
+	reg64 src_reg64 = get_register_fp(riscv_register, rs1);
+	float src_float = *((float*)&src_reg64);
+	unsigned int dest_uint = (unsigned int)src_float;  
+	set_register_general(riscv_register, rd, (unsigned long int)dest_uint);
+}
+void fcvt_S_W(Riscv64_register* riscv_register, int rd, int rs1)  // signed word(32-bit)   -> single-precision fp
+{
+	reg64 src_reg64 = get_register_general(riscv_register, rs1);
+	int src_int = (int)src_reg64;
+	float dest_float = (float)src_int;  
+	set_register_fp(riscv_register, rd, (unsigned long int)(*((unsigned int*)&dest_float)));
+}
+void fcvt_S_WU(Riscv64_register* riscv_register, int rd, int rs1) // unsigned word(32-bit) -> single-precision fp
+{
+	reg64 src_reg64 = get_register_general(riscv_register, rs1);
+	unsigned int src_uint = (unsigned int)src_reg64;
+	float dest_float = (float)src_uint;  
+	set_register_fp(riscv_register, rd, (unsigned long int)(*((unsigned int*)&dest_float)));
+}
+
+/* Compare */
+void feq_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // == 
+{
+	reg64 src1_reg64 = get_register_fp(riscv_register, rs1);
+	float src1_float = *((float*)&src1_reg64);
+	reg64 src2_reg64 = get_register_fp(riscv_register, rs2);
+	float src2_float = *((float*)&src2_reg64);
+	if(src1_float == src2_float)
+		set_register_general(riscv_register, rd, 1);
+	else
+		set_register_general(riscv_register, rd, 0);		
+}
+void flt_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // <
+{
+	reg64 src1_reg64 = get_register_fp(riscv_register, rs1);
+	float src1_float = *((float*)&src1_reg64);
+	reg64 src2_reg64 = get_register_fp(riscv_register, rs2);
+	float src2_float = *((float*)&src2_reg64);
+	if(src1_float < src2_float)
+		set_register_general(riscv_register, rd, 1);
+	else
+		set_register_general(riscv_register, rd, 0);
+}
+void fle_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // <=
+{
+	reg64 src1_reg64 = get_register_fp(riscv_register, rs1);
+	float src1_float = *((float*)&src1_reg64);
+	reg64 src2_reg64 = get_register_fp(riscv_register, rs2);
+	float src2_float = *((float*)&src2_reg64);
+	if(src1_float <= src2_float)
+		set_register_general(riscv_register, rd, 1);
+	else
+		set_register_general(riscv_register, rd, 0);
+}
+
+
+/*********************************************/
+/*                                           */
+/* functions for instructions RV32D          */
+/*                                           */
+/*********************************************/
+
+/* Load */
+void fld(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd, int rs1, int imm)
+{
+	reg64 reg_value = get_register_general(riscv_register, rs1);
+	reg64 load_value = get_memory_reg64(riscv_memory, (byte*)(reg_value + imm));
+	set_register_fp(riscv_register, rd, (unsigned long int)load_value);
+}
+
+/* Store */
+void fsd(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rs1, int rs2, int imm)
+{
+	reg64 reg_value = get_register_general(riscv_register, rs1);
+	reg64 store_value = get_memory_reg32(riscv_memory, (byte*)(unsigned long int)rs2);
+	set_memory_reg32(riscv_memory, (byte*)(reg_value + imm), store_value);
+}
+
+/* Arithmetics */
+void fadd_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	double temp = *((double*)&riscv_register->f[rs1]) + *((double*)&riscv_register->f[rs2]);
+	riscv_register->f[rd] = (reg64)(*(unsigned long int*)&temp);
+}
+void fsub_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	double temp = *((double*)&riscv_register->f[rs1]) - *((double*)&riscv_register->f[rs2]);
+	riscv_register->f[rd] = (reg64)(*(unsigned long int*)&temp);
+}
+void fmul_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	double temp = *((double*)&riscv_register->f[rs1]) * *((double*)&riscv_register->f[rs2]);
+	riscv_register->f[rd] = (reg64)(*(unsigned long int*)&temp);
+}
+void fdiv_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	double temp = *((double*)&riscv_register->f[rs1]) / *((double*)&riscv_register->f[rs2]);
+	riscv_register->f[rd] = (reg64)(*(unsigned long int*)&temp);
+}
+void fmin_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	double temp = MIN(*((double*)&riscv_register->f[rs1]), *((double*)&riscv_register->f[rs2]));
+	riscv_register->f[rd] = (reg64)(*(unsigned long int*)&temp);
+}
+void fmax_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	double temp = MAX(*((double*)&riscv_register->f[rs1]), *((double*)&riscv_register->f[rs2]));
+	riscv_register->f[rd] = (reg64)(*(unsigned long int*)&temp);
+}
+void fsqrt_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	double temp = sqrt(*((double*)&riscv_register->f[rs1]));
+	riscv_register->f[rd] = (reg64)(*(unsigned long int*)&temp);
+}
+
+void fmadd_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2, int rs3)  // rs1*rs2+rs3
+{
+	double temp = *((double*)&riscv_register->f[rs1]) * *((double*)&riscv_register->f[rs2]) + *((double*)&riscv_register->f[rs3]);
+	riscv_register->f[rd] = (reg64)(*(unsigned long int*)&temp);
+}
+void fmsub_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2, int rs3)  // rs1*rs2-rs3
+{
+	double temp = *((double*)&riscv_register->f[rs1]) * *((double*)&riscv_register->f[rs2]) - *((double*)&riscv_register->f[rs3]);
+	riscv_register->f[rd] = (reg64)(*(unsigned long int*)&temp);
+}
+void fnmadd_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2, int rs3) // -(rs1*rs2+rs3)
+{
+	double temp = -(*((double*)&riscv_register->f[rs1]) * *((double*)&riscv_register->f[rs2]) + *((double*)&riscv_register->f[rs3]));
+	riscv_register->f[rd] = (reg64)(*(unsigned long int*)&temp);
+}
+void fnmsub_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2, int rs3) // -(rs1*rs2-rs3)
+{
+	double temp = -(*((double*)&riscv_register->f[rs1]) * *((double*)&riscv_register->f[rs2]) - *((double*)&riscv_register->f[rs3]));
+	riscv_register->f[rd] = (reg64)(*(unsigned long int*)&temp);
+}
+
+/* Type Conversion */
+void fcvt_S_D(Riscv64_register* riscv_register, int rd, int rs1) // double-precision fp -> single-precision fp
+{
+	reg64 src_reg64 = get_register_fp(riscv_register, rs1);
+	double src_double = *((double*)&src_reg64);
+	float dest_float = (float)src_double;
+	set_register_general(riscv_register, rd, (unsigned long int)dest_float);
+}
+void fcvt_D_S(Riscv64_register* riscv_register, int rd, int rs1) // single-precision fp -> double-precision fp
+{
+	reg64 src_reg64 = get_register_fp(riscv_register, rs1);
+	float src_float = *((float*)&src_reg64);
+	double dest_double = (double)src_float;
+	set_register_general(riscv_register, rd, (unsigned long int)dest_double);
+}
+void fcvt_W_D(Riscv64_register* riscv_register, int rd, int rs1)  // double-precision fp   -> single word(32-bit)
+{
+	reg64 src_reg64 = get_register_fp(riscv_register, rs1);
+	double src_double = *((double*)&src_reg64);
+	int dest_int = (int)src_double;  
+	set_register_general(riscv_register, rd, (long int)dest_int);
+}
+void fcvt_WU_D(Riscv64_register* riscv_register, int rd, int rs1) // double-precision fp   -> unsigned word(32-bit)
+{
+	reg64 src_reg64 = get_register_fp(riscv_register, rs1);
+	double src_double = *((double*)&src_reg64);
+	unsigned int dest_uint = (unsigned int)src_double;  
+	set_register_general(riscv_register, rd, (unsigned long int)dest_uint);
+}
+void fcvt_D_W(Riscv64_register* riscv_register, int rd, int rs1)  // signed word(32-bit)   -> double-precision fp
+{
+	reg64 src_reg64 = get_register_general(riscv_register, rs1);
+	int src_int = (int)src_reg64;
+	double dest_double = (double)src_int;  
+	set_register_fp(riscv_register, rd, (unsigned long int)(*((unsigned int*)&dest_double)));
+}
+void fcvt_D_WU(Riscv64_register* riscv_register, int rd, int rs1) // unsigned word(32-bit) -> double-precision fp
+{
+	reg64 src_reg64 = get_register_general(riscv_register, rs1);
+	unsigned int src_uint = (unsigned int)src_reg64;
+	double dest_double = (double)src_uint;  
+	set_register_fp(riscv_register, rd, (unsigned long int)(*((unsigned int*)&dest_double)));
+}
+
+/* Compare */
+void feq_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // == 
+{
+	reg64 src1_reg64 = get_register_fp(riscv_register, rs1);
+	double src1_double = *((double*)&src1_reg64);
+	reg64 src2_reg64 = get_register_fp(riscv_register, rs2);
+	double src2_double = *((double*)&src2_reg64);
+	if(src1_double == src2_double)
+		set_register_general(riscv_register, rd, 1);
+	else
+		set_register_general(riscv_register, rd, 0);		
+}
+void flt_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // <
+{
+	reg64 src1_reg64 = get_register_fp(riscv_register, rs1);
+	double src1_double = *((double*)&src1_reg64);
+	reg64 src2_reg64 = get_register_fp(riscv_register, rs2);
+	double src2_double = *((double*)&src2_reg64);
+	if(src1_double < src2_double)
+		set_register_general(riscv_register, rd, 1);
+	else
+		set_register_general(riscv_register, rd, 0);
+}
+void fle_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // <=
+{
+	reg64 src1_reg64 = get_register_fp(riscv_register, rs1);
+	double src1_double = *((double*)&src1_reg64);
+	reg64 src2_reg64 = get_register_fp(riscv_register, rs2);
+	double src2_double = *((double*)&src2_reg64);
+	if(src1_double <= src2_double)
+		set_register_general(riscv_register, rd, 1);
+	else
+		set_register_general(riscv_register, rd, 0);
+}

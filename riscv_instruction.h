@@ -1,10 +1,14 @@
 #include "memory_system.h"
 
 
+/* some tool macro */
+#define MAX(a,b)  (a>b?a:b)
+#define MIN(a,b)  (a<b?a:b)
+
 // instruction type
 typedef enum
 {
-	R_TYPE, I_TYPE, S_TYPE, SB_TYPE, U_TYPE, UJ_TYPE, NOT_DEFINED
+	R_TYPE, R4_TYPE, I_TYPE, S_TYPE, SB_TYPE, U_TYPE, UJ_TYPE, NOT_DEFINED
 }INSTYPE;
 
 /* a tool, create a binary number like this :   */
@@ -24,7 +28,15 @@ typedef enum
 #define RS1(inst)        ((inst&ONES(19,15))>>15)    // 5
 #define RS2(inst)        ((inst&ONES(24,20))>>20)    // 5
 #define SHAMT(inst)      ((inst&ONES(25,20))>>20)    // 6, RV64I
-#define IMM_SIGN(inst)   ((inst>>31)&1)               // sign of immediate
+#define IMM_SIGN(inst)   ((inst>>31)&1)              // sign of immediate
+/* floating-point */
+#define CSR(inst)        ((inst&ONES(31,20))>>20)    // 12
+#define FUNCT5(inst)     ((inst&ONES(31,27))>>27)    // 5
+#define FMT(inst)        ((inst&ONES(26,25))>>25)    // 2
+#define FUNCT2(inst)     ((inst&ONES(26,25))>>25)    // 2
+#define RM(inst)         ((inst&ONES(14,12))>>12)    // 3
+#define RS3(inst)        ((inst&ONES(31,27))>>27)    // 5
+#define WIDTH(inst)      ((inst&ONES(14,12))>>12)    // 3
 
 
 /* --------------------   immediates  ------------------------    */
@@ -56,13 +68,11 @@ typedef enum
 /*    20--------5----7    */
 #define U_IMM(inst)      (inst&ONES(31,12))
 
-
-
 /* J-type */
 #define J_IMM(inst)      (((inst&ONES(30,21))>>20) | ((inst&ONES(20,20))>>9) | (inst&ONES(19,12)) | (IMM_SIGN(inst)*ONES(31,20)))
 
 /* UJ-type */
-#define UJ_IMM(inst)      (((inst&ONES(30,21))>>20) | ((inst&ONES(20,20))>>9) | (inst&ONES(19,12)) | (IMM_SIGN(inst)*ONES(31,20)))
+#define UJ_IMM(inst)     (((inst&ONES(30,21))>>20) | ((inst&ONES(20,20))>>9) | (inst&ONES(19,12)) | (IMM_SIGN(inst)*ONES(31,20)))
 // same as J-type?
 
 // error when an undefined instruction occurs
@@ -72,6 +82,7 @@ INSTYPE GetINSTYPE(Riscv64_decoder*);
 
 // execute different instructions according to their types
 void R_execute(Riscv64_decoder*, Riscv64_register*, Riscv64_memory*);
+void R4_execute(Riscv64_decoder*, Riscv64_register*, Riscv64_memory*);
 void I_execute(Riscv64_decoder*, Riscv64_register*, Riscv64_memory*);
 void S_execute(Riscv64_decoder*, Riscv64_register*, Riscv64_memory*);
 void SB_execute(Riscv64_decoder*, Riscv64_register*, Riscv64_memory*);
@@ -170,3 +181,81 @@ void srlw(Riscv64_register*, int rd, int rs1, int rs2);
 void srliw(Riscv64_register*, int rd, int rs1, int shamt);
 void sraw(Riscv64_register*, int rd, int rs1, int rs2);
 void sraiw(Riscv64_register*, int rd, int rs1, int shamt);
+
+
+/*********************************************/
+/*                                           */
+/* functions for instructions RV32F          */
+/*                                           */
+/*********************************************/
+
+/* Load */
+void flw(Riscv64_register*, Riscv64_memory*, int rd, int rs1, int imm);
+
+/* Store */
+void fsw(Riscv64_register*, Riscv64_memory*, int rs1, int rs2, int imm);
+
+/* Arithmetics */
+void fadd_S(Riscv64_register*, int rd, int rs1, int rs2);
+void fsub_S(Riscv64_register*, int rd, int rs1, int rs2);
+void fmul_S(Riscv64_register*, int rd, int rs1, int rs2);
+void fdiv_S(Riscv64_register*, int rd, int rs1, int rs2);
+void fmin_S(Riscv64_register*, int rd, int rs1, int rs2);
+void fmax_S(Riscv64_register*, int rd, int rs1, int rs2);
+void fsqrt_S(Riscv64_register*, int rd, int rs1, int rs2);
+
+void fmadd_S(Riscv64_register*, int rd, int rs1, int rs2, int rs3);  // rs1*rs2+rs3
+void fmsub_S(Riscv64_register*, int rd, int rs1, int rs2, int rs3);  // rs1*rs2-rs3
+void fnmadd_S(Riscv64_register*, int rd, int rs1, int rs2, int rs3); // -(rs1*rs2+rs3)
+void fnmsub_S(Riscv64_register*, int rd, int rs1, int rs2, int rs3); // -(rs1*rs2-rs3)
+
+/* Type Conversion */
+void fcvt_W_S(Riscv64_register*, int rd, int rs1);  // single-precision fp   -> signed word(32-bit)
+void fcvt_WU_S(Riscv64_register*, int rd, int rs1); // single-precision fp   -> unsigned word(32-bit)
+void fcvt_S_W(Riscv64_register*, int rd, int rs1);  // signed word(32-bit)   -> single-precision fp
+void fcvt_S_WU(Riscv64_register*, int rd, int rs1); // unsigned word(32-bit) -> single-precision fp
+
+/* Compare */
+void feq_S(Riscv64_register*, int rd, int rs1, int rs2); // == 
+void flt_S(Riscv64_register*, int rd, int rs1, int rs2); // <
+void fle_S(Riscv64_register*, int rd, int rs1, int rs2); // <=
+
+
+/*********************************************/
+/*                                           */
+/* functions for instructions RV32D          */
+/*                                           */
+/*********************************************/
+
+/* Load */
+void fld(Riscv64_register*, Riscv64_memory*, int rd, int rs1, int imm);
+
+/* Store */
+void fsd(Riscv64_register*, Riscv64_memory*, int rs1, int rs2, int imm);
+
+/* Arithmetics */
+void fadd_D(Riscv64_register*, int rd, int rs1, int rs2);
+void fsub_D(Riscv64_register*, int rd, int rs1, int rs2);
+void fmul_D(Riscv64_register*, int rd, int rs1, int rs2);
+void fdiv_D(Riscv64_register*, int rd, int rs1, int rs2);
+void fmin_D(Riscv64_register*, int rd, int rs1, int rs2);
+void fmax_D(Riscv64_register*, int rd, int rs1, int rs2);
+void fsqrt_D(Riscv64_register*, int rd, int rs1, int rs2);
+
+void fmadd_D(Riscv64_register*, int rd, int rs1, int rs2, int rs3);  // rs1*rs2+rs3
+void fmsub_D(Riscv64_register*, int rd, int rs1, int rs2, int rs3);  // rs1*rs2-rs3
+void fnmadd_D(Riscv64_register*, int rd, int rs1, int rs2, int rs3); // -(rs1*rs2+rs3)
+void fnmsub_D(Riscv64_register*, int rd, int rs1, int rs2, int rs3); // -(rs1*rs2-rs3)
+
+/* Type Conversion */
+void fcvt_S_D(Riscv64_register*, int rd, int rs1); // double-precision fp -> single-precision fp
+void fcvt_D_S(Riscv64_register*, int rd, int rs1); // single-precision fp -> double-precision fp
+void fcvt_W_D(Riscv64_register*, int rd, int rs1);  // double-precision fp   -> signed word(32-bit)
+void fcvt_WU_D(Riscv64_register*, int rd, int rs1); // double-precision fp   -> unsigned word(32-bit)
+void fcvt_D_W(Riscv64_register*, int rd, int rs1);  // signed word(32-bit)   -> double-precision fp
+void fcvt_D_WU(Riscv64_register*, int rd, int rs1); // unsigned word(32-bit) -> double-precision fp
+
+/* Compare */
+void feq_D(Riscv64_register*, int rd, int rs1, int rs2); // == 
+void flt_D(Riscv64_register*, int rd, int rs1, int rs2); // <
+void fle_D(Riscv64_register*, int rd, int rs1, int rs2); // <=

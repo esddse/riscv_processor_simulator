@@ -21,7 +21,7 @@ void print_mem(byte* start, int length); // print out a block of mem, for debug
 /*                                           */
 /*********************************************/
 void help(); // print the help information
-byte* read_file(FILE* fp, int* size);  //read the  whole file into the mem
+byte* read_file(FILE* file_p, int* size);  //read the  whole file into the mem
 void load_program(Elf64_Ehdr*, Riscv64_register*, Riscv64_memory*); // load program
 
 /*********************************************/

@@ -29,12 +29,12 @@ void print_mem(byte* start, int length)
 }
 
 // read the  whole file into the mem
-byte* read_file(FILE* fp, int* p_size)
+byte* read_file(FILE* file_p, int* p_size)
 {
 	// get size of the file
-	fseek(fp, 0, SEEK_END);
-	*p_size = ftell(fp);
-	rewind(fp);
+	fseek(file_p, 0, SEEK_END);
+	*p_size = ftell(file_p);
+	rewind(file_p);
 
 	// malloc buffer
 	byte* buffer = (byte*) malloc (sizeof(byte) * *p_size);
@@ -45,7 +45,7 @@ byte* read_file(FILE* fp, int* p_size)
 	}
 
 	// read
-	fread(buffer, 1, *p_size, fp);
+	fread(buffer, 1, *p_size, file_p);
 
 	return buffer;
 }
@@ -63,6 +63,7 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 
 	printf("segment_num = %d\n", ph_num);
 
+	// load segment to virtual memory one by one
 	for(int i = 0; i < ph_num; i++)
 	{
 		Elf64_Phdr* program_header = (Elf64_Phdr*)((byte*)program_header_1 + ph_size*i);
@@ -80,7 +81,7 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 			set_register_pc(riscv_register, (reg64)program_header->p_vaddr);
 		}
 
-		printf("%x\n", *(instruction*)p_seg_actual_addr);
+		printf("the first instruction is %x\n", *(instruction*)p_seg_actual_addr);
 
 	}
 /*
@@ -89,9 +90,31 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 	int sh_size = elf_header->e_shentsize;
 	int sh_num = elf_header->e_shnum;
 
+	// pointer to the first symbol table and the size of symble table section
+	Elf64_Sym* symbol_tabel_1 = NULL;
+	unsigned long int symtab_size = sizeof(Elf64_Sym);
+	unsigned long int symtab_num = 0;
+
 	for(int i = 0; i < sh_num; i++)
 	{
 		Elf64_Shdr* section_header = (Elf64_Shdr*)((byte*)section_header_1 + sh_size*i);
+		//printf("section offset in file: %x\n", section_header->sh_offset);
+		
+		// symbol table
+		if (section_header->sh_type == SHT_SYMTAB)
+		{
+			// the addr of the first symbol table
+			symbol_tabel_1 = (Elf64_Sym*)((byte*)elf_header + section_header->sh_offset);
+			// calculate the number of symbol table
+			symtab_num = section_header->sh_size / symtab_size;
+		}
+	}
+
+	// symbol table
+	for(int i = 0; i < symtab_num; i++)
+	{
+		Elf64_Sym* symbol_table = (Elf64_Sym*)((byte*)symbol_tabel_1 + symtab_size*i);
+		//printf("the value of symbol is : %x\n", symbol_table->st_name);
 	}
 */
 	return;
@@ -114,6 +137,7 @@ instruction fetch(Riscv64_memory* riscv_memory, Riscv64_register* riscv_register
 
 void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 {
+	riscv_decoder->inst         = inst;    // save the complete instruction for debug 
 	riscv_decoder->opcode       = OPCODE(inst);
 	riscv_decoder->funct3       = FUNCT3(inst);
 	riscv_decoder->funct7       = FUNCT7(inst);
@@ -126,6 +150,13 @@ void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 	riscv_decoder->SB_immediate = SB_IMM(inst);
 	riscv_decoder->U_immediate  = U_IMM(inst);
 	riscv_decoder->UJ_immediate = UJ_IMM(inst);
+	riscv_decoder->csr          = CSR(inst);
+	riscv_decoder->funct5       = FUNCT5(inst);
+	riscv_decoder->funct2       = FUNCT2(inst);
+	riscv_decoder->fmt          = FMT(inst);
+	riscv_decoder->rm           = RM(inst);
+	riscv_decoder->rs3          = RS3(inst);
+	riscv_decoder->width        = WIDTH(inst);
 
 	printf("opcode = %x\n", riscv_decoder->opcode);
 	return;
@@ -179,7 +210,7 @@ int main(int argc, char const *argv[])
 	}
 
 	int file_num = argc - 1; // number of file
-	FILE *fp;  // file pointer
+	FILE *file_p;  // file pointer
 
 	// memory system
 	Riscv64_register *riscv_register;
@@ -199,9 +230,9 @@ int main(int argc, char const *argv[])
 			printf("%s", file_name);
 		}
 
-		fp = fopen(file_name, "rb");  // binary mode
+		file_p = fopen(file_name, "rb");  // binary mode
 
-		if(fp == NULL)
+		if(file_p == NULL)
 		{
 			printf("Can not open file : %s successfully.\n", file_name);
 			exit(1);
@@ -211,7 +242,7 @@ int main(int argc, char const *argv[])
 
 		// read the whole elf
 		int size;
-		byte* buffer = read_file(fp, &size);
+		byte* buffer = read_file(file_p, &size);
 		printf("the size of the file is : %d bytes\n", size);
 
 		// get the elf header
@@ -231,7 +262,7 @@ int main(int argc, char const *argv[])
 		load_program(elf_header, riscv_register, riscv_memory);
 
 		int j = 1;
-		while(j--)
+		while(j)
 		{
 			instruction inst = fetch(riscv_memory, riscv_register);
 			decode(riscv_decoder, inst);

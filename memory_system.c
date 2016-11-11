@@ -23,7 +23,7 @@ void init_register(Riscv64_register** riscv_register, Riscv64_memory* riscv_memo
 	// set all registers 0 
 	*riscv_register = (Riscv64_register*) malloc (sizeof(Riscv64_register));
 	memset(*riscv_register, 0, sizeof(Riscv64_register));
-	(*riscv_register)->x[14] = (reg64)riscv_memory->stack_bottom; // set pc
+	(*riscv_register)->sp = (reg64)riscv_memory->stack_bottom; // set sp
 }
 
 // Riscv64_memory* init_memory(Riscv64_memory* riscv_memory)
@@ -143,6 +143,7 @@ reg64 get_memory_reg64(Riscv64_memory* riscv_memory, byte* virtual_addr)
 /*                                           */
 /*********************************************/
 
+// integer
 void set_register_pc(Riscv64_register* riscv_register, reg64 value)
 {
 	riscv_register->pc = value;
@@ -178,4 +179,29 @@ reg64 get_register_general(Riscv64_register* riscv_register , int index)
 void register_pc_self_increase(Riscv64_register* riscv_register)
 {
 	riscv_register->pc += sizeof(instruction);
+}
+
+// floating-point
+void set_register_fcsr(Riscv64_register* riscv_register, reg64 value)
+{
+	riscv_register->fcsr = value;
+}
+
+reg64 get_register_fcsr(Riscv64_register* riscv_register)
+{
+	return riscv_register->fcsr;
+} 
+
+void set_register_fp(Riscv64_register* riscv_register, int index, reg64 value)
+{
+	if(index < 0 || index > 31)
+	{
+		printf("Error: register index out of range.\n");
+	}
+	riscv_register->f[index] = value;
+}
+
+reg64 get_register_fp(Riscv64_register* riscv_register, int index)
+{
+	return riscv_register->f[index];
 }
