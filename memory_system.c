@@ -23,7 +23,7 @@ void init_register(Riscv64_register** riscv_register, Riscv64_memory* riscv_memo
 	// set all registers 0 
 	*riscv_register = (Riscv64_register*) malloc (sizeof(Riscv64_register));
 	memset(*riscv_register, 0, sizeof(Riscv64_register));
-	(*riscv_register)->sp = (reg64)riscv_memory->stack_bottom; // set sp
+	(*riscv_register)->sp = get_virtual_addr(riscv_memory, (reg64)riscv_memory->stack_bottom); // set sp
 }
 
 // Riscv64_memory* init_memory(Riscv64_memory* riscv_memory)
@@ -52,17 +52,17 @@ void delete_memory_system(Riscv64_decoder* riscv_decoder, Riscv64_register* risc
 
 byte* get_actual_addr(Riscv64_memory* riscv_memory, byte* virtual_addr)
 {
-	return riscv_memory->memory + (long int)virtual_addr;
+	return riscv_memory->memory + (unsigned long int)virtual_addr;
 }
 
 byte* get_virtual_addr(Riscv64_memory* riscv_memory, byte* actual_addr)
 {
-	return (byte*)((long int)actual_addr - (long int)riscv_memory->memory);
+	return (byte*)((unsigned long int)actual_addr - (unsigned long int)riscv_memory->memory);
 }	
 
 bool out_of_memory_virtual(Riscv64_memory* riscv_memory, byte* virtual_addr)
 {
-	return (long int)virtual_addr > riscv_memory->mem_size ? TRUE : FALSE;
+	return (unsigned long int)virtual_addr > riscv_memory->mem_size ? TRUE : FALSE;
 }
 
 bool out_of_memory_actual(Riscv64_memory* riscv_memory, byte* actual_addr)
@@ -124,7 +124,7 @@ reg32 get_memory_reg32(Riscv64_memory* riscv_memory, byte* virtual_addr)
 	return *(reg32*)actual_addr;
 }
 void  set_memory_reg64(Riscv64_memory* riscv_memory, byte* virtual_addr, reg64 value)
-{
+{		
 	check_valid_memory_virtual(riscv_memory, virtual_addr);
 	byte* actual_addr = get_actual_addr(riscv_memory, virtual_addr);
 	*(reg64*)actual_addr = value;

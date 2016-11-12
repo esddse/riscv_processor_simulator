@@ -24,10 +24,12 @@ typedef enum
 #define OPCODE(inst)     inst&ONES(6,0)              // 7
 #define FUNCT3(inst)     ((inst&ONES(14,12))>>12)    // 3
 #define FUNCT7(inst)     ((inst&ONES(31,25))>>25)    // 7
+#define FUNCT6(inst)     ((inst&ONES(31,26))>>26)    // 6
 #define RD(inst)         ((inst&ONES(11,7))>>7)      // 5
 #define RS1(inst)        ((inst&ONES(19,15))>>15)    // 5
 #define RS2(inst)        ((inst&ONES(24,20))>>20)    // 5
-#define SHAMT(inst)      ((inst&ONES(25,20))>>20)    // 6, RV64I
+#define SHAMT64(inst)    ((inst&ONES(25,20))>>20)    // 6, RV64I
+#define SHAMT32(inst)    ((inst&ONES(25,20))>>20)    // 5, RV64I
 #define IMM_SIGN(inst)   ((inst>>31)&1)              // sign of immediate
 /* floating-point */
 #define CSR(inst)        ((inst&ONES(31,20))>>20)    // 12
@@ -127,11 +129,11 @@ void andi(Riscv64_register*, int rd, int rs1, int imm);       // and immediate
 
 /* Shifts */
 void sll(Riscv64_register*, int rd, int rs1, int rs2);         // shift left
-void slli(Riscv64_register*, int rd, int rs1, int shamt);      // shift left immediate
+void slli(Riscv64_register*, int rd, int rs1, int shamt64);      // shift left immediate
 void srl(Riscv64_register*, int rd, int rs1, int rs2);         // shift right
-void srli(Riscv64_register*, int rd, int rs1, int shamt);      // shift right immediate
+void srli(Riscv64_register*, int rd, int rs1, int shamt64);      // shift right immediate
 void sra(Riscv64_register*, int rd, int rs1, int rs2);         // shift right arithmetic
-void srai(Riscv64_register*, int rd, int rs1, int shamt);      // shift right arithmetic immediate
+void srai(Riscv64_register*, int rd, int rs1, int shamt64);      // shift right arithmetic immediate
 
 /* Compare */
 void slt(Riscv64_register*, int rd, int rs1, int rs2);         // set <
@@ -153,6 +155,21 @@ void jalr(Riscv64_register*, Riscv64_memory*, int rd, int rs1, int imm);
 
 /* System */
 void scall();
+
+/*********************************************/
+/*                                           */
+/* functions for instructions RV32M          */
+/*                                           */
+/*********************************************/
+void mul(Riscv64_register* riscv_register, int rd, int rs1, int rs2);    // xlen*xlen -> lower xlen to rd
+void mulh(Riscv64_register* riscv_register, int rd, int rs1, int rs2);   // signed * signed  high
+void mulhsu(Riscv64_register* riscv_register, int rd, int rs1, int rs2); // unsigned * unsigned  high
+void mulhu(Riscv64_register* riscv_register, int rd, int rs1, int rs2);  // signed *unsigned  high
+void divd(Riscv64_register* riscv_register, int rd, int rs1, int rs2);    // signed / signed      
+void divu(Riscv64_register* riscv_register, int rd, int rs1, int rs2);   // unsigned / unsigned 
+void rem(Riscv64_register* riscv_register, int rd, int rs1, int rs2);    // signed / signed  remainder
+void remu(Riscv64_register* riscv_register, int rd, int rs1, int rs2);   // unsigned / unsgined remainder
+
 
 
 /*********************************************/
@@ -176,11 +193,25 @@ void subw(Riscv64_register*, int rd, int rs1, int rs2);
 
 /* Shifts */
 void sllw(Riscv64_register*, int rd, int rs1, int rs2);
-void slliw(Riscv64_register*, int rd, int rs1, int shamt);
+void slliw(Riscv64_register*, int rd, int rs1, int shamt32);
 void srlw(Riscv64_register*, int rd, int rs1, int rs2);
-void srliw(Riscv64_register*, int rd, int rs1, int shamt);
+void srliw(Riscv64_register*, int rd, int rs1, int shamt32);
 void sraw(Riscv64_register*, int rd, int rs1, int rs2);
-void sraiw(Riscv64_register*, int rd, int rs1, int shamt);
+void sraiw(Riscv64_register*, int rd, int rs1, int shamt32);
+
+
+
+/*********************************************/
+/*                                           */
+/* functions for instructions RV64M          */
+/*                                           */
+/*********************************************/
+void mulw(Riscv64_register*, int rd, int rs1, int rs2);
+void divw(Riscv64_register*, int rd, int rs1, int rs2);
+void divuw(Riscv64_register*, int rd, int rs1, int rs2);
+void remw(Riscv64_register*, int rd, int rs1, int rs2);
+void remuw(Riscv64_register*, int rd, int rs1, int rs2);
+
 
 
 /*********************************************/

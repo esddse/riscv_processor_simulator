@@ -15,6 +15,7 @@ INSTYPE GetINSTYPE(Riscv64_decoder* riscv_decoder)
 	{
 		case 0x33: // b0110011
 		case 0x53: // b1010011 fp
+		case 0x3b: // b0111011
 			return R_TYPE;
 
 		case 0x43: // b1000011 fp
@@ -59,6 +60,18 @@ INSTYPE GetINSTYPE(Riscv64_decoder* riscv_decoder)
 				default:
 					return NOT_DEFINED;
 			}
+
+		case 0x1b: // b0011011
+			switch(riscv_decoder->funct3)
+			{
+				case 1: // b001
+				case 5: // b101
+					return R_TYPE;
+				case 0: // b000
+					return I_TYPE;
+				default:
+					return NOT_DEFINED;
+			} 
 		default:
 			return NOT_DEFINED;
 	}
@@ -78,6 +91,9 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 						case 0x00: // b0000000
 							add(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
 							break;
+						case 0x01: // b0000001
+							mul(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
 						case 0x20: // b0100000
 							sub(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
 							break;
@@ -91,6 +107,9 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 						case 0x00: // b0000000
 							sll(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
 							break;
+						case 0x01: // b0000001
+							mulh(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
 						default:
 							Error_NoDef(riscv_decoder);
 					}
@@ -100,6 +119,9 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					{
 						case 0x00: // b0000000
 							slt(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 0x01: // b0000001
+							mulhsu(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -111,6 +133,9 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 						case 0x00: // b0000000
 							sltu(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
 							break;
+						case 0x01: // b0000001
+							mulhu(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
 						default:
 							Error_NoDef(riscv_decoder);
 					}
@@ -121,6 +146,9 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 						case 0x00: // b0000000
 							xor(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
 							break;
+						case 0x01: // b0000001
+							divd(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
 						default:
 							Error_NoDef(riscv_decoder);
 					}
@@ -130,6 +158,9 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					{
 						case 0x00: // b0000000
 							srl(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 0x01: // b0000001
+							divu(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
 							break;
 						case 0x20: // b0100000
 							sra(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
@@ -144,6 +175,9 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 						case 0x00: // b0000000
 							or(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
 							break;
+						case 0x01: // b0000001
+							rem(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
 						default:
 							Error_NoDef(riscv_decoder);
 					}
@@ -153,6 +187,9 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					{
 						case 0x00: // b0000000
 							and(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 0x01: // b0000001
+							remu(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -314,6 +351,77 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 				default:
 					Error_NoDef(riscv_decoder);
 			}
+		case 0x3b: // b0111011
+			switch(riscv_decoder->funct3)
+			{
+				case 0:
+					switch(riscv_decoder->funct7)
+					{
+						case 0x00: // b0000000
+							addw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 0x20: // b0100000
+							subw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						default:
+							Error_NoDef(riscv_decoder);
+					}
+					break;
+				case 1:
+					sllw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 4:
+					divw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 5:
+					switch(riscv_decoder->funct7)
+					{
+						case 0x00: // b0000000
+							srlw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 0x01: // b0000001
+							divuw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 0x20: // b0100000
+							sraw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						default:
+							Error_NoDef(riscv_decoder);
+					}
+					break;
+				case 6:
+					remw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				case 7:
+					remuw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+					break;
+				default:
+					Error_NoDef(riscv_decoder);
+			}
+			break;
+		case 0x1b: // b0010011
+			switch(riscv_decoder->funct3)
+			{
+				case 1: // b001
+					slliw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt32);
+					break;
+				case 5: // b101
+					switch(riscv_decoder->funct7)
+					{
+						case 0x00: // b0000000
+							srliw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt32);
+							break;
+						case 0x20: // b0100000
+							sraiw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt32);
+							break;
+						default:
+							Error_NoDef(riscv_decoder);
+					}
+					break;
+				default:
+					Error_NoDef(riscv_decoder);
+			}
+			break;
 		case 0x13: // b0010011
 			switch(riscv_decoder->funct3)
 			{
@@ -321,7 +429,7 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					switch(riscv_decoder->funct7)
 					{
 						case 0x00: // b0000000
-							slli(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt);
+							slli(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt64);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -331,10 +439,10 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					switch(riscv_decoder->funct7)
 					{
 						case 0x00: // b0000000
-							srli(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt);
+							srli(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt64);
 							break;
 						case 0x20: // b0100000
-							srai(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt);
+							srai(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt64);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -436,11 +544,17 @@ void I_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 				case 2: // b010
 					lw(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
 					break;
+				case 3: // b011
+					ld(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					break;
 				case 4: // b100
 					lbu(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
 					break;
 				case 5: // b101
 					lhu(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					break;
+				case 6: // b110
+					lwu(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
 					break;
 				default:
 					Error_NoDef(riscv_decoder);
@@ -455,6 +569,9 @@ void I_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 				default:
 					Error_NoDef(riscv_decoder);
 			}
+		case 0x1b: // b0011011
+			addiw(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+			break;
 		case 0x13: // b0010011
 			switch(riscv_decoder->funct3)
 			{
@@ -512,6 +629,9 @@ void S_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					break;
 				case 2: // b010
 					sw(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->S_immediate);
+					break;
+				case 3: // b011
+					sd(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->S_immediate);
 					break;
 				default:
 					Error_NoDef(riscv_decoder);
@@ -708,36 +828,36 @@ void andi(Riscv64_register* riscv_register, int rd, int rs1, int imm)       // a
 /* Shifts */
 void sll(Riscv64_register* riscv_register, int rd, int rs1, int rs2)        // shift left
 {
-	reg64 shift_value = get_register_general(riscv_register, rs2) & 0x1F; // get the lower 5 bits of register rs2
+	reg64 shift_value = get_register_general(riscv_register, rs2) & 0x3F; // get the lower 6 bits of register rs2
 	long int reg_value = get_register_general(riscv_register, rs1);
 	set_register_general(riscv_register, rd, reg_value << shift_value);
 }
-void slli(Riscv64_register* riscv_register, int rd, int rs1, int shamt)      // shift left immediate
+void slli(Riscv64_register* riscv_register, int rd, int rs1, int shamt64)      // shift left immediate
 {
 	long int reg_value = get_register_general(riscv_register, rs1);
-	set_register_general(riscv_register, rd, reg_value << shamt);
+	set_register_general(riscv_register, rd, reg_value << shamt64);
 }
 void srl(Riscv64_register* riscv_register, int rd, int rs1, int rs2)        // shift right
 {
-	reg64 shift_value = get_register_general(riscv_register, rs2) & 0x1F; // get the lower 5 bits of register rs2
+	reg64 shift_value = get_register_general(riscv_register, rs2) & 0x3F; // get the lower 6 bits of register rs2
 	unsigned long int reg_value = get_register_general(riscv_register, rs1);
 	set_register_general(riscv_register, rd, reg_value >> shift_value);
 }
-void srli(Riscv64_register* riscv_register, int rd, int rs1, int shamt)      // shift right immediate
+void srli(Riscv64_register* riscv_register, int rd, int rs1, int shamt64)      // shift right immediate
 {
 	unsigned long int reg_value = get_register_general(riscv_register, rs1);
-	set_register_general(riscv_register, rd, reg_value >> shamt);
+	set_register_general(riscv_register, rd, reg_value >> shamt64);
 }
 void sra(Riscv64_register* riscv_register, int rd, int rs1, int rs2)         // shift right arithmetic
 {
-	reg64 shift_value = get_register_general(riscv_register, rs2) & 0x1F; // get the lower 5 bits of register rs2
+	reg64 shift_value = get_register_general(riscv_register, rs2) & 0x3F; // get the lower 5 bits of register rs2
 	long int reg_value = get_register_general(riscv_register, rs1);
 	set_register_general(riscv_register, rd, reg_value >> shift_value);
 }
-void srai(Riscv64_register* riscv_register, int rd, int rs1, int shamt)      // shift right arithmetic immediate
+void srai(Riscv64_register* riscv_register, int rd, int rs1, int shamt64)      // shift right arithmetic immediate
 {
 	long int reg_value = get_register_general(riscv_register, rs1);
-	set_register_general(riscv_register, rd, reg_value >> shamt);
+	set_register_general(riscv_register, rd, reg_value >> shamt64);
 }
 
 /* Compare */
@@ -841,30 +961,189 @@ void scall()
 
 /*********************************************/
 /*                                           */
+/* functions for instructions RV32M          */
+/*                                           */
+/*********************************************/
+void mul(Riscv64_register* riscv_register, int rd, int rs1, int rs2)    // xlen*xlen -> lower xlen to rd
+{
+	int value_rs1 = (int)get_register_general(riscv_register, rs1);
+	int value_rs2 = (int)get_register_general(riscv_register, rs2);
+	int result = value_rs1 * value_rs2;
+	set_register_general(riscv_register, rd, (reg64)result);
+}
+void mulh(Riscv64_register* riscv_register, int rd, int rs1, int rs2)   // signed * signed  high
+{
+	int value_rs1 = (int)get_register_general(riscv_register, rs1);
+	int value_rs2 = (int)get_register_general(riscv_register, rs2);
+	long long result = (long long)value_rs1 * (long long)value_rs2;
+	result >>= 32; 
+	set_register_general(riscv_register, rd, (reg64)result);
+}
+void mulhsu(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // unsigned * unsigned  high
+{
+	unsigned int value_rs1 = (unsigned int)get_register_general(riscv_register, rs1);
+	unsigned int value_rs2 = (unsigned int)get_register_general(riscv_register, rs2);
+	unsigned long long result = (unsigned long long)value_rs1 * (unsigned long long)value_rs2;
+	result >>= 32; 
+	set_register_general(riscv_register, rd, (reg64)result);
+}
+void mulhu(Riscv64_register* riscv_register, int rd, int rs1, int rs2)  // signed *unsigned  high
+{
+	int value_rs1 = (int)get_register_general(riscv_register, rs1); // multiplicand
+	unsigned int value_rs2 = (unsigned int)get_register_general(riscv_register, rs2); // multiplier
+	long long result = (long long)value_rs1 * (unsigned long long)value_rs2;
+	result >>= 32; 
+	set_register_general(riscv_register, rd, (reg64)result);
+}
+void divd(Riscv64_register* riscv_register, int rd, int rs1, int rs2)    // signed / signed      
+{
+	int value_rs1 = (int)get_register_general(riscv_register, rs1);
+	int value_rs2 = (int)get_register_general(riscv_register, rs2);
+	int result = value_rs1 / value_rs2;
+	set_register_general(riscv_register, rd, (reg64)result);
+}
+void divu(Riscv64_register* riscv_register, int rd, int rs1, int rs2)   // unsigned / unsigned 
+{
+	unsigned int value_rs1 = (unsigned int)get_register_general(riscv_register, rs1);
+	unsigned int value_rs2 = (unsigned int)get_register_general(riscv_register, rs2);
+	unsigned int result = value_rs1 / value_rs2;
+	set_register_general(riscv_register, rd, (reg64)result);
+}
+void rem(Riscv64_register* riscv_register, int rd, int rs1, int rs2)    // signed / signed  remainder
+{
+	int value_rs1 = (int)get_register_general(riscv_register, rs1);
+	int value_rs2 = (int)get_register_general(riscv_register, rs2);
+	int result = value_rs1 % value_rs2;
+	set_register_general(riscv_register, rd, (reg64)result);
+}
+void remu(Riscv64_register* riscv_register, int rd, int rs1, int rs2)   // unsigned / unsgined remainder
+{
+	unsigned int value_rs1 = (unsigned int)get_register_general(riscv_register, rs1);
+	unsigned int value_rs2 = (unsigned int)get_register_general(riscv_register, rs2);
+	unsigned int result = value_rs1 % value_rs2;
+	set_register_general(riscv_register, rd, (reg64)result);
+}
+
+/*********************************************/
+/*                                           */
 /* functions for instructions  RV64I         */
 /*                                           */
 /*********************************************/
 
 /* Loads */
-void lwu(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd, int rs1, int imm);
-void ld(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd, int rs1, int imm);
-
+void lwu(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd, int rs1, int imm)
+{
+	reg64 reg_value = get_register_general(riscv_register, rs1);
+	reg32 load_value = get_memory_reg32(riscv_memory, (byte*)(reg_value + imm));
+	set_register_general(riscv_register, rd, (unsigned long int)load_value);
+}
+void ld(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd, int rs1, int imm)
+{
+	reg64 reg_value = get_register_general(riscv_register, rs1);
+	reg64 load_value = get_memory_reg64(riscv_memory, (byte*)(reg_value + imm));
+	set_register_general(riscv_register, rd, load_value);
+}
 /* Stores */
-void sd(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rs1, int rs2, int imm);
+void sd(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rs1, int rs2, int imm)
+{
+	printf("rs1=%d, rs2=%d, imm=%d ", rs1, rs2, imm);
+		
+	reg64 reg_value = get_register_general(riscv_register, rs1);
+	reg64 store_value = get_register_general(riscv_register, rs2);
+	printf("reg_value=%x \n", reg_value);
+	set_memory_reg64(riscv_memory, (byte*)(reg_value + imm), store_value);
+}
 
 /* Arithmetic */
-void addw(Riscv64_register* riscv_register, int rd, int rs1, int rs2);
-void addiw(Riscv64_register* riscv_register, int rd, int rs1, int imm);
-void subw(Riscv64_register* riscv_register, int rd, int rs1, int rs2);
+void addw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	riscv_register->x[rd] = (unsigned long int)((int)riscv_register->x[rs1] + (int)riscv_register->x[rs2]);
+}
+void addiw(Riscv64_register* riscv_register, int rd, int rs1, int imm)
+{
+	riscv_register->x[rd] = (unsigned long int)((int)riscv_register->x[rs1] + (int)imm);
+}
+void subw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	riscv_register->x[rd] = (unsigned long int)((int)riscv_register->x[rs1] - (int)riscv_register->x[rs2]);
+}
 
 /* Shifts */
-void sllw(Riscv64_register* riscv_register, int rd, int rs1, int rs2);
-void slliw(Riscv64_register* riscv_register, int rd, int rs1, int shamt);
-void srlw(Riscv64_register* riscv_register, int rd, int rs1, int rs2);
-void srliw(Riscv64_register* riscv_register, int rd, int rs1, int shamt);
-void sraw(Riscv64_register* riscv_register, int rd, int rs1, int rs2);
-void sraiw(Riscv64_register* riscv_register, int rd, int rs1, int shamt);
+void sllw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	reg64 shift_value = get_register_general(riscv_register, rs2) & 0x1F; // get the lower 5 bits of register rs2
+	int reg_value = (int)get_register_general(riscv_register, rs1);
+	set_register_general(riscv_register, rd, (long int)(reg_value << shift_value));
+}
+void slliw(Riscv64_register* riscv_register, int rd, int rs1, int shamt32)
+{
+	int reg_value = (int)get_register_general(riscv_register, rs1);
+	set_register_general(riscv_register, rd, (long int)(reg_value << shamt32));
+}
+void srlw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	reg64 shift_value = get_register_general(riscv_register, rs2) & 0x1F; // get the lower 5 bits of register rs2
+	unsigned int reg_value = (unsigned int)get_register_general(riscv_register, rs1);
+	set_register_general(riscv_register, rd, (long int)(reg_value >> shift_value));	
+}
+void srliw(Riscv64_register* riscv_register, int rd, int rs1, int shamt32)
+{
+	unsigned int reg_value = (unsigned int)get_register_general(riscv_register, rs1);
+	set_register_general(riscv_register, rd, (long int)(reg_value >> shamt32));
+}
+void sraw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	reg64 shift_value = get_register_general(riscv_register, rs2) & 0x1F; // get the lower 5 bits of register rs2
+	int reg_value = get_register_general(riscv_register, rs1);
+	set_register_general(riscv_register, rd, (long int)(reg_value >> shift_value));
+}
+void sraiw(Riscv64_register* riscv_register, int rd, int rs1, int shamt32)
+{
+	int reg_value = (int)get_register_general(riscv_register, rs1);
+	set_register_general(riscv_register, rd, (long int)(reg_value >> shamt32));
+}
 
+
+/*********************************************/
+/*                                           */
+/* functions for instructions RV64M          */
+/*                                           */
+/*********************************************/
+void mulw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	int value_rs1 = (int)get_register_general(riscv_register, rs1);
+	int value_rs2 = (int)get_register_general(riscv_register, rs2);
+	int result = value_rs1 * value_rs2;
+	set_register_general(riscv_register, rd, (long int)result);
+}
+void divw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	int value_rs1 = (int)get_register_general(riscv_register, rs1);
+	int value_rs2 = (int)get_register_general(riscv_register, rs2);
+	int result = value_rs1 / value_rs2;
+	set_register_general(riscv_register, rd, (long int)result);
+}
+void divuw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	unsigned int value_rs1 = (unsigned int)get_register_general(riscv_register, rs1);
+	unsigned int value_rs2 = (unsigned int)get_register_general(riscv_register, rs2);
+	unsigned int result = value_rs1 / value_rs2;
+	set_register_general(riscv_register, rd, (unsigned long int)result);
+}
+void remw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	int value_rs1 = (int)get_register_general(riscv_register, rs1);
+	int value_rs2 = (int)get_register_general(riscv_register, rs2);
+	int result = value_rs1 % value_rs2;
+	set_register_general(riscv_register, rd, (long int)result);	
+}
+void remuw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
+{
+	unsigned int value_rs1 = (unsigned int)get_register_general(riscv_register, rs1);
+	unsigned int value_rs2 = (unsigned int)get_register_general(riscv_register, rs2);
+	unsigned int result = value_rs1 % value_rs2;
+	set_register_general(riscv_register, rd, (unsigned long int)result);
+}
 
 
 /*********************************************/

@@ -60,10 +60,12 @@ typedef struct riscv64_decoder{
 	int opcode;
 	int funct3;
 	int funct7;
+	int funct6;
 	int rd;
 	int rs1;
 	int rs2;
-	int shamt;
+	int shamt64;
+	int shamt32;
 	int I_immediate;
 	int S_immediate;
 	int SB_immediate;

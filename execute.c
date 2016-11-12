@@ -132,6 +132,7 @@ instruction fetch(Riscv64_memory* riscv_memory, Riscv64_register* riscv_register
 	byte* virtual_addr_pc = (byte*) get_register_pc(riscv_register);
 	instruction inst = (instruction) get_memory_reg64(riscv_memory, virtual_addr_pc);
 	register_pc_self_increase(riscv_register);
+	printf("pc=%x  instruction=%x \n", virtual_addr_pc, inst);
 	return inst;
 }
 
@@ -141,10 +142,12 @@ void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 	riscv_decoder->opcode       = OPCODE(inst);
 	riscv_decoder->funct3       = FUNCT3(inst);
 	riscv_decoder->funct7       = FUNCT7(inst);
+	riscv_decoder->funct6       = FUNCT6(inst);
 	riscv_decoder->rd           = RD(inst);
 	riscv_decoder->rs1          = RS1(inst);
 	riscv_decoder->rs2          = RS2(inst);
-	riscv_decoder->shamt        = SHAMT(inst);
+	riscv_decoder->shamt64      = SHAMT64(inst);
+	riscv_decoder->shamt32      = SHAMT32(inst);
 	riscv_decoder->I_immediate  = I_IMM(inst);
 	riscv_decoder->S_immediate  = S_IMM(inst);
 	riscv_decoder->SB_immediate = SB_IMM(inst);
@@ -158,7 +161,6 @@ void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 	riscv_decoder->rs3          = RS3(inst);
 	riscv_decoder->width        = WIDTH(inst);
 
-	printf("opcode = %x\n", riscv_decoder->opcode);
 	return;
 }
 
