@@ -1,5 +1,31 @@
+/*******************************************************************/
+/* To make it easy to add a new instruction, we define and write   */
+/* all the codes about instructions in file "riscv_instruction.h"  */
+/* for definition, and in file "riscv_instruction.c" for           */
+/* implementation. If you want to add a new instruction to our     */
+/* simulator, you could just simply follow the steps below:        */
+/*                                                                 */
+/*  1. Add the opcode of your new instruction(maybe your funct3    */
+/*     and funct7 as well, if there are any conflict with current  */
+/*     opcodes) to the appropriate place(according to your         */
+/*     instruction type) in the function GetINSTYPE in             */
+/*     "riscv_instruction.c";                                      */
+/*  2. Add your instruction entrance to function XX_Execute        */
+/*     according to your instruction type. For example, if your    */
+/*     instruction is R_TYPE, then your are welcome to the         */
+/*     function R_Execute. You should add your entrance according  */
+/*     to your opcode, funct3, and maybe funct7 as well;           */
+/*  3. Add the definition of your instruction to                   */
+/*     "riscv_instruction.h", and your implementation to           */
+/*     "riscv_instruction.c".                                      */
+/* If you take the steps above correctly, your new instruction     */
+/* will work!                                                      */
+/*******************************************************************/
 #include "memory_system.h"
+#include <unistd.h>
 
+#define FALSE 0
+#define TRUE  1
 
 /* some tool macro */
 #define MAX(a,b)  (a>b?a:b)
@@ -154,7 +180,7 @@ void jal(Riscv64_register*, Riscv64_memory*, int rd, int imm);
 void jalr(Riscv64_register*, Riscv64_memory*, int rd, int rs1, int imm);
 
 /* System */
-void scall();
+void scall(Riscv64_register*, Riscv64_memory*);
 
 /*********************************************/
 /*                                           */
@@ -165,8 +191,8 @@ void mul(Riscv64_register* riscv_register, int rd, int rs1, int rs2);    // xlen
 void mulh(Riscv64_register* riscv_register, int rd, int rs1, int rs2);   // signed * signed  high
 void mulhsu(Riscv64_register* riscv_register, int rd, int rs1, int rs2); // unsigned * unsigned  high
 void mulhu(Riscv64_register* riscv_register, int rd, int rs1, int rs2);  // signed *unsigned  high
-void divd(Riscv64_register* riscv_register, int rd, int rs1, int rs2);    // signed / signed      
-void divu(Riscv64_register* riscv_register, int rd, int rs1, int rs2);   // unsigned / unsigned 
+void divd(Riscv64_register* riscv_register, int rd, int rs1, int rs2);    // signed / signed
+void divu(Riscv64_register* riscv_register, int rd, int rs1, int rs2);   // unsigned / unsigned
 void rem(Riscv64_register* riscv_register, int rd, int rs1, int rs2);    // signed / signed  remainder
 void remu(Riscv64_register* riscv_register, int rd, int rs1, int rs2);   // unsigned / unsgined remainder
 
@@ -247,7 +273,7 @@ void fcvt_S_W(Riscv64_register*, int rd, int rs1);  // signed word(32-bit)   -> 
 void fcvt_S_WU(Riscv64_register*, int rd, int rs1); // unsigned word(32-bit) -> single-precision fp
 
 /* Compare */
-void feq_S(Riscv64_register*, int rd, int rs1, int rs2); // == 
+void feq_S(Riscv64_register*, int rd, int rs1, int rs2); // ==
 void flt_S(Riscv64_register*, int rd, int rs1, int rs2); // <
 void fle_S(Riscv64_register*, int rd, int rs1, int rs2); // <=
 
@@ -287,6 +313,6 @@ void fcvt_D_W(Riscv64_register*, int rd, int rs1);  // signed word(32-bit)   -> 
 void fcvt_D_WU(Riscv64_register*, int rd, int rs1); // unsigned word(32-bit) -> double-precision fp
 
 /* Compare */
-void feq_D(Riscv64_register*, int rd, int rs1, int rs2); // == 
+void feq_D(Riscv64_register*, int rd, int rs1, int rs2); // ==
 void flt_D(Riscv64_register*, int rd, int rs1, int rs2); // <
 void fle_D(Riscv64_register*, int rd, int rs1, int rs2); // <=

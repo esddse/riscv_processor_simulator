@@ -1,12 +1,36 @@
-
+/*******************************************************************/
+/* To make it easy to add a new instruction, we define and write   */
+/* all the codes about instructions in file "riscv_instruction.h"  */
+/* for definition, and in file "riscv_instruction.c" for           */
+/* implementation. If you want to add a new instruction to our     */
+/* simulator, you could just simply follow the steps below:        */
+/*                                                                 */
+/*  1. Add the opcode of your new instruction(maybe your funct3    */
+/*     and funct7 as well, if there are any conflict with current  */
+/*     opcodes) to the appropriate place(according to your         */
+/*     instruction type) in the function GetINSTYPE in             */
+/*     "riscv_instruction.c";                                      */
+/*  2. Add your instruction entrance to function XX_Execute        */
+/*     according to your instruction type. For example, if your    */
+/*     instruction is R_TYPE, then your are welcome to the         */
+/*     function R_Execute. You should add your entrance according  */
+/*     to your opcode, funct3, and maybe funct7 as well;           */
+/*  3. Add the definition of your instruction to                   */
+/*     "riscv_instruction.h", and your implementation to           */
+/*     "riscv_instruction.c".                                      */
+/* If you take the steps above correctly, your new instruction     */
+/* will work!                                                      */
+/*******************************************************************/
 #include "riscv_instruction.h"
 
+// a flag which shows whether syscall exit happened
+int EXIT_HAPPENED = FALSE;
 
 void Error_NoDef(Riscv64_decoder* riscv_decoder)
 {
-	printf("Instruction %x not defined: opcode(%d), funct3(%d), funct7(%d)\n",
-	        riscv_decoder->inst, riscv_decoder->opcode, riscv_decoder->funct3, riscv_decoder->funct7);
-	exit(1);
+	printf("Instruction %x not defined: opcode(0x%x), funct3(0x%x), funct7(0x%x), rs2(0x%x)\n",
+	        riscv_decoder->inst, riscv_decoder->opcode, riscv_decoder->funct3, riscv_decoder->funct7, riscv_decoder->rs2);
+	// exit(1);
 }
 // return the instuction type according to the opcode
 INSTYPE GetINSTYPE(Riscv64_decoder* riscv_decoder)
@@ -16,13 +40,14 @@ INSTYPE GetINSTYPE(Riscv64_decoder* riscv_decoder)
 		case 0x33: // b0110011
 		case 0x53: // b1010011 fp
 		case 0x3b: // b0111011
+			// printf("R_TYPE RETURNED;");
 			return R_TYPE;
 
 		case 0x43: // b1000011 fp
 		case 0x47: // b1000111 fp
 		case 0x4b: // b1001011 fp
 		case 0x4f: // b1001111 fp
-			return R4_TYPE; 
+			return R4_TYPE;
 
 		case 0x67: // b1100111
 		case 0x03: // b0000011
@@ -71,7 +96,7 @@ INSTYPE GetINSTYPE(Riscv64_decoder* riscv_decoder)
 					return I_TYPE;
 				default:
 					return NOT_DEFINED;
-			} 
+			}
 		default:
 			return NOT_DEFINED;
 	}
@@ -351,6 +376,7 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 				default:
 					Error_NoDef(riscv_decoder);
 			}
+			break;
 		case 0x3b: // b0111011
 			switch(riscv_decoder->funct3)
 			{
@@ -473,7 +499,7 @@ void R4_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register
 				default:
 					Error_NoDef(riscv_decoder);
 			}
-			break;	
+			break;
 		case 0x47: // b1000111 fp
 			switch(riscv_decoder->funct2)
 			{
@@ -486,7 +512,7 @@ void R4_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register
 				default:
 					Error_NoDef(riscv_decoder);
 			}
-			break;	
+			break;
 		case 0x4b: // b1001011 fp
 			switch(riscv_decoder->funct2)
 			{
@@ -499,7 +525,7 @@ void R4_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register
 				default:
 					Error_NoDef(riscv_decoder);
 			}
-			break;	
+			break;
 		case 0x4f: // b1001111 fp
 			switch(riscv_decoder->funct2)
 			{
@@ -512,7 +538,7 @@ void R4_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register
 				default:
 					Error_NoDef(riscv_decoder);
 			}
-			break;	
+			break;
 		default:
 			Error_NoDef(riscv_decoder);
 	}
@@ -564,7 +590,7 @@ void I_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 			switch(riscv_decoder->funct3)
 			{
 				case 0: // b000
-					scall();
+					scall(riscv_register, riscv_memory);
 					break;
 				default:
 					Error_NoDef(riscv_decoder);
@@ -956,8 +982,25 @@ void jalr(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd
 }
 
 /* System */
-void scall()
-{exit(1);}
+void scall(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)
+{
+	switch(riscv_register->x[17])
+	{
+		case 93: // exit
+			printf("exit parameters: a1=%d, a2=%d, a3=%d\n", riscv_register->x[11], riscv_register->x[12], riscv_register->x[13]);
+			EXIT_HAPPENED = TRUE;
+			break;
+		case 63: // read
+			riscv_register->x[10] = read(riscv_register->x[10], (void*) riscv_register->x[11], riscv_register->x[12]);
+			break;
+		case 64: // write
+			riscv_register->x[10] = write(riscv_register->x[10], (void*) riscv_register->x[11], riscv_register->x[12]);
+			break;
+		default:
+			printf("System call type %d not defined!", (int)riscv_register->x[17]);
+			// Error_NoDef(riscv_decoder);
+	}
+}
 
 /*********************************************/
 /*                                           */
@@ -976,7 +1019,7 @@ void mulh(Riscv64_register* riscv_register, int rd, int rs1, int rs2)   // signe
 	int value_rs1 = (int)get_register_general(riscv_register, rs1);
 	int value_rs2 = (int)get_register_general(riscv_register, rs2);
 	long long result = (long long)value_rs1 * (long long)value_rs2;
-	result >>= 32; 
+	result >>= 32;
 	set_register_general(riscv_register, rd, (reg64)result);
 }
 void mulhsu(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // unsigned * unsigned  high
@@ -984,7 +1027,7 @@ void mulhsu(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // unsig
 	unsigned int value_rs1 = (unsigned int)get_register_general(riscv_register, rs1);
 	unsigned int value_rs2 = (unsigned int)get_register_general(riscv_register, rs2);
 	unsigned long long result = (unsigned long long)value_rs1 * (unsigned long long)value_rs2;
-	result >>= 32; 
+	result >>= 32;
 	set_register_general(riscv_register, rd, (reg64)result);
 }
 void mulhu(Riscv64_register* riscv_register, int rd, int rs1, int rs2)  // signed *unsigned  high
@@ -992,17 +1035,17 @@ void mulhu(Riscv64_register* riscv_register, int rd, int rs1, int rs2)  // signe
 	int value_rs1 = (int)get_register_general(riscv_register, rs1); // multiplicand
 	unsigned int value_rs2 = (unsigned int)get_register_general(riscv_register, rs2); // multiplier
 	long long result = (long long)value_rs1 * (unsigned long long)value_rs2;
-	result >>= 32; 
+	result >>= 32;
 	set_register_general(riscv_register, rd, (reg64)result);
 }
-void divd(Riscv64_register* riscv_register, int rd, int rs1, int rs2)    // signed / signed      
+void divd(Riscv64_register* riscv_register, int rd, int rs1, int rs2)    // signed / signed
 {
 	int value_rs1 = (int)get_register_general(riscv_register, rs1);
 	int value_rs2 = (int)get_register_general(riscv_register, rs2);
 	int result = value_rs1 / value_rs2;
 	set_register_general(riscv_register, rd, (reg64)result);
 }
-void divu(Riscv64_register* riscv_register, int rd, int rs1, int rs2)   // unsigned / unsigned 
+void divu(Riscv64_register* riscv_register, int rd, int rs1, int rs2)   // unsigned / unsigned
 {
 	unsigned int value_rs1 = (unsigned int)get_register_general(riscv_register, rs1);
 	unsigned int value_rs2 = (unsigned int)get_register_general(riscv_register, rs2);
@@ -1047,7 +1090,7 @@ void ld(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd, 
 void sd(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rs1, int rs2, int imm)
 {
 	printf("rs1=%d, rs2=%d, imm=%d ", rs1, rs2, imm);
-		
+
 	reg64 reg_value = get_register_general(riscv_register, rs1);
 	reg64 store_value = get_register_general(riscv_register, rs2);
 	printf("reg_value=%x \n", reg_value);
@@ -1084,7 +1127,7 @@ void srlw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
 {
 	reg64 shift_value = get_register_general(riscv_register, rs2) & 0x1F; // get the lower 5 bits of register rs2
 	unsigned int reg_value = (unsigned int)get_register_general(riscv_register, rs1);
-	set_register_general(riscv_register, rd, (long int)(reg_value >> shift_value));	
+	set_register_general(riscv_register, rd, (long int)(reg_value >> shift_value));
 }
 void srliw(Riscv64_register* riscv_register, int rd, int rs1, int shamt32)
 {
@@ -1135,7 +1178,7 @@ void remw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
 	int value_rs1 = (int)get_register_general(riscv_register, rs1);
 	int value_rs2 = (int)get_register_general(riscv_register, rs2);
 	int result = value_rs1 % value_rs2;
-	set_register_general(riscv_register, rd, (long int)result);	
+	set_register_general(riscv_register, rd, (long int)result);
 }
 void remuw(Riscv64_register* riscv_register, int rd, int rs1, int rs2)
 {
@@ -1231,33 +1274,33 @@ void fcvt_W_S(Riscv64_register* riscv_register, int rd, int rs1)  // single-prec
 {
 	reg64 src_reg64 = get_register_fp(riscv_register, rs1);
 	float src_float = *((float*)&src_reg64);
-	int dest_int = (int)src_float;  
+	int dest_int = (int)src_float;
 	set_register_general(riscv_register, rd, (long int)dest_int);
 }
 void fcvt_WU_S(Riscv64_register* riscv_register, int rd, int rs1) // single-precision fp   -> unsigned word(32-bit)
 {
 	reg64 src_reg64 = get_register_fp(riscv_register, rs1);
 	float src_float = *((float*)&src_reg64);
-	unsigned int dest_uint = (unsigned int)src_float;  
+	unsigned int dest_uint = (unsigned int)src_float;
 	set_register_general(riscv_register, rd, (unsigned long int)dest_uint);
 }
 void fcvt_S_W(Riscv64_register* riscv_register, int rd, int rs1)  // signed word(32-bit)   -> single-precision fp
 {
 	reg64 src_reg64 = get_register_general(riscv_register, rs1);
 	int src_int = (int)src_reg64;
-	float dest_float = (float)src_int;  
+	float dest_float = (float)src_int;
 	set_register_fp(riscv_register, rd, (unsigned long int)(*((unsigned int*)&dest_float)));
 }
 void fcvt_S_WU(Riscv64_register* riscv_register, int rd, int rs1) // unsigned word(32-bit) -> single-precision fp
 {
 	reg64 src_reg64 = get_register_general(riscv_register, rs1);
 	unsigned int src_uint = (unsigned int)src_reg64;
-	float dest_float = (float)src_uint;  
+	float dest_float = (float)src_uint;
 	set_register_fp(riscv_register, rd, (unsigned long int)(*((unsigned int*)&dest_float)));
 }
 
 /* Compare */
-void feq_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // == 
+void feq_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // ==
 {
 	reg64 src1_reg64 = get_register_fp(riscv_register, rs1);
 	float src1_float = *((float*)&src1_reg64);
@@ -1266,7 +1309,7 @@ void feq_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // ==
 	if(src1_float == src2_float)
 		set_register_general(riscv_register, rd, 1);
 	else
-		set_register_general(riscv_register, rd, 0);		
+		set_register_general(riscv_register, rd, 0);
 }
 void flt_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // <
 {
@@ -1391,33 +1434,33 @@ void fcvt_W_D(Riscv64_register* riscv_register, int rd, int rs1)  // double-prec
 {
 	reg64 src_reg64 = get_register_fp(riscv_register, rs1);
 	double src_double = *((double*)&src_reg64);
-	int dest_int = (int)src_double;  
+	int dest_int = (int)src_double;
 	set_register_general(riscv_register, rd, (long int)dest_int);
 }
 void fcvt_WU_D(Riscv64_register* riscv_register, int rd, int rs1) // double-precision fp   -> unsigned word(32-bit)
 {
 	reg64 src_reg64 = get_register_fp(riscv_register, rs1);
 	double src_double = *((double*)&src_reg64);
-	unsigned int dest_uint = (unsigned int)src_double;  
+	unsigned int dest_uint = (unsigned int)src_double;
 	set_register_general(riscv_register, rd, (unsigned long int)dest_uint);
 }
 void fcvt_D_W(Riscv64_register* riscv_register, int rd, int rs1)  // signed word(32-bit)   -> double-precision fp
 {
 	reg64 src_reg64 = get_register_general(riscv_register, rs1);
 	int src_int = (int)src_reg64;
-	double dest_double = (double)src_int;  
+	double dest_double = (double)src_int;
 	set_register_fp(riscv_register, rd, (unsigned long int)(*((unsigned int*)&dest_double)));
 }
 void fcvt_D_WU(Riscv64_register* riscv_register, int rd, int rs1) // unsigned word(32-bit) -> double-precision fp
 {
 	reg64 src_reg64 = get_register_general(riscv_register, rs1);
 	unsigned int src_uint = (unsigned int)src_reg64;
-	double dest_double = (double)src_uint;  
+	double dest_double = (double)src_uint;
 	set_register_fp(riscv_register, rd, (unsigned long int)(*((unsigned int*)&dest_double)));
 }
 
 /* Compare */
-void feq_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // == 
+void feq_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // ==
 {
 	reg64 src1_reg64 = get_register_fp(riscv_register, rs1);
 	double src1_double = *((double*)&src1_reg64);
@@ -1426,7 +1469,7 @@ void feq_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // ==
 	if(src1_double == src2_double)
 		set_register_general(riscv_register, rd, 1);
 	else
-		set_register_general(riscv_register, rd, 0);		
+		set_register_general(riscv_register, rd, 0);
 }
 void flt_D(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // <
 {

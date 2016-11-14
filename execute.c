@@ -1,6 +1,29 @@
+/*******************************************************************/
+/* To make it easy to add a new instruction, we define and write   */
+/* all the codes about instructions in file "riscv_instruction.h"  */
+/* for definition, and in file "riscv_instruction.c" for           */
+/* implementation. If you want to add a new instruction to our     */
+/* simulator, you could just simply follow the steps below:        */
+/*                                                                 */
+/*  1. Add the opcode of your new instruction(maybe your funct3    */
+/*     and funct7 as well, if there are any conflict with current  */
+/*     opcodes) to the appropriate place(according to your         */
+/*     instruction type) in the function GetINSTYPE in             */
+/*     "riscv_instruction.c";                                      */
+/*  2. Add your instruction entrance to function XX_Execute        */
+/*     according to your instruction type. For example, if your    */
+/*     instruction is R_TYPE, then your are welcome to the         */
+/*     function R_Execute. You should add your entrance according  */
+/*     to your opcode, funct3, and maybe funct7 as well;           */
+/*  3. Add the definition of your instruction to                   */
+/*     "riscv_instruction.h", and your implementation to           */
+/*     "riscv_instruction.c".                                      */
+/* If you take the steps above correctly, your new instruction     */
+/* will work!                                                      */
+/*******************************************************************/
 #include "execute.h"
 
-
+extern int EXIT_HAPPENED;
 /*********************************************/
 /*                                           */
 /* functions for parsing elf and load program*/
@@ -80,7 +103,7 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 		{
 			set_register_pc(riscv_register, (reg64)program_header->p_vaddr);
 		}
-
+		EXIT_HAPPENED = FALSE;
 		printf("the first instruction is %x\n", *(instruction*)p_seg_actual_addr);
 
 	}
@@ -99,7 +122,7 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 	{
 		Elf64_Shdr* section_header = (Elf64_Shdr*)((byte*)section_header_1 + sh_size*i);
 		//printf("section offset in file: %x\n", section_header->sh_offset);
-		
+
 		// symbol table
 		if (section_header->sh_type == SHT_SYMTAB)
 		{
@@ -138,7 +161,7 @@ instruction fetch(Riscv64_memory* riscv_memory, Riscv64_register* riscv_register
 
 void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 {
-	riscv_decoder->inst         = inst;    // save the complete instruction for debug 
+	riscv_decoder->inst         = inst;    // save the complete instruction for debug
 	riscv_decoder->opcode       = OPCODE(inst);
 	riscv_decoder->funct3       = FUNCT3(inst);
 	riscv_decoder->funct7       = FUNCT7(inst);
@@ -263,8 +286,8 @@ int main(int argc, char const *argv[])
 		//load program
 		load_program(elf_header, riscv_register, riscv_memory);
 
-		int j = 1;
-		while(j)
+		int j = 100;
+		while(j && !EXIT_HAPPENED)
 		{
 			instruction inst = fetch(riscv_memory, riscv_register);
 			decode(riscv_decoder, inst);
