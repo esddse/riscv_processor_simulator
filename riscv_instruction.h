@@ -23,6 +23,7 @@
 /*******************************************************************/
 #include "memory_system.h"
 #include <unistd.h>
+#include <sys/time.h>
 
 #define FALSE 0
 #define TRUE  1

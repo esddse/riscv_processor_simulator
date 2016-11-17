@@ -294,7 +294,7 @@ int main(int argc, char const *argv[])
 			execute(riscv_decoder, riscv_register, riscv_memory);
 		}
 
-
+		printf("Program exits!\n");
 		// gc
 		delete_memory_system(riscv_decoder, riscv_register, riscv_memory);
 		free(buffer);

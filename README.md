@@ -11,6 +11,6 @@
 	hello.c：包括printf
 	test.c：包括一个初始化的全局变量和一个未初始化的全局变量
 
+编译方式:gcc -std=c99 -o simulator memory_system.c riscv_instruction.c execute.c -lm -fno-stack-protector
 
-编译方式: gcc -std=c99 -o simulator memory_system.c riscv_instruction.c execute.c -lm
-
+已添加Makefile，故可执行make直接编译
