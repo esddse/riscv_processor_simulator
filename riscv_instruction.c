@@ -455,6 +455,7 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					switch(riscv_decoder->funct7)
 					{
 						case 0x00: // b0000000
+						case 0x01: // b0000001
 							slli(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt64);
 							break;
 						default:
@@ -465,9 +466,11 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					switch(riscv_decoder->funct7)
 					{
 						case 0x00: // b0000000
+						case 0x01: // b0000001
 							srli(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt64);
 							break;
 						case 0x20: // b0100000
+						case 0x21: // b0100001
 							srai(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt64);
 							break;
 						default:
@@ -984,6 +987,7 @@ void jalr(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd
 /* System */
 void scall(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)
 {
+	printf("syscall happened!");
 	switch(riscv_register->x[17])
 	{
 		case 93: // exit
@@ -996,6 +1000,22 @@ void scall(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)
 		case 64: // write
 			riscv_register->x[10] = write(riscv_register->x[10], (void*) riscv_register->x[11], riscv_register->x[12]);
 			break;
+		case 169: // time
+		{
+
+			struct timeval *tv_p;
+			tv_p = (struct timeval*)get_actual_addr(riscv_memory, riscv_register->x[10]);
+            riscv_register->x[10] = gettimeofday(tv_p, NULL);
+            break;
+		}
+        case 214: // sbrk
+        	// where is the heap address?
+        	break;
+        case 57: // close file
+        	break;
+        case 80: // fstat
+        	break;
+
 		default:
 			printf("System call type %d not defined!", (int)riscv_register->x[17]);
 			// Error_NoDef(riscv_decoder);
