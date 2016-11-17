@@ -115,12 +115,15 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					{
 						case 0x00: // b0000000
 							add(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("add", "d12", riscv_decoder, riscv_register);
 							break;
 						case 0x01: // b0000001
 							mul(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("mul", "d12", riscv_decoder, riscv_register);
 							break;
 						case 0x20: // b0100000
 							sub(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("sub", "d12", riscv_decoder, riscv_register);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -131,9 +134,11 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					{
 						case 0x00: // b0000000
 							sll(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("sll", "d12", riscv_decoder, riscv_register);
 							break;
 						case 0x01: // b0000001
 							mulh(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("mulh", "d12", riscv_decoder, riscv_register);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -144,9 +149,11 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					{
 						case 0x00: // b0000000
 							slt(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("slt", "d12", riscv_decoder, riscv_register);
 							break;
 						case 0x01: // b0000001
 							mulhsu(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("mulhsu", "d12", riscv_decoder, riscv_register);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -157,9 +164,11 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					{
 						case 0x00: // b0000000
 							sltu(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("sltu", "d12", riscv_decoder, riscv_register);
 							break;
 						case 0x01: // b0000001
 							mulhu(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("mulhu", "d12", riscv_decoder, riscv_register);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -170,9 +179,11 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					{
 						case 0x00: // b0000000
 							xor(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("xor", "d12", riscv_decoder, riscv_register);
 							break;
 						case 0x01: // b0000001
 							divd(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("divd", "d12", riscv_decoder, riscv_register);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -183,12 +194,15 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					{
 						case 0x00: // b0000000
 							srl(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("srl", "d12", riscv_decoder, riscv_register);
 							break;
 						case 0x01: // b0000001
 							divu(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("divu", "d12", riscv_decoder, riscv_register);
 							break;
 						case 0x20: // b0100000
 							sra(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("sra", "d12", riscv_decoder, riscv_register);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -199,9 +213,11 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					{
 						case 0x00: // b0000000
 							or(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("or", "d12", riscv_decoder, riscv_register);
 							break;
 						case 0x01: // b0000001
 							rem(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("rem", "d12", riscv_decoder, riscv_register);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -212,9 +228,11 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					{
 						case 0x00: // b0000000
 							and(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("and", "d12", riscv_decoder, riscv_register);
 							break;
 						case 0x01: // b0000001
 							remu(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							DEBUG_INST("remu", "d12", riscv_decoder, riscv_register);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -457,6 +475,7 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 						case 0x00: // b0000000
 						case 0x01: // b0000001
 							slli(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt64);
+							DEBUG_INST("slli", "d1s", riscv_decoder, riscv_register);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -468,10 +487,12 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 						case 0x00: // b0000000
 						case 0x01: // b0000001
 							srli(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt64);
+							DEBUG_INST("srli", "d1s", riscv_decoder, riscv_register);
 							break;
 						case 0x20: // b0100000
 						case 0x21: // b0100001
 							srai(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt64);
+							DEBUG_INST("srai", "d1s", riscv_decoder, riscv_register);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -556,7 +577,8 @@ void I_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 			{
 				case 0: // b000
 					jalr(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
-					break;
+					DEBUG_INST("jalr", "d1i", riscv_decoder, riscv_register);
+			break;
 				default:
 					Error_NoDef(riscv_decoder);
 			}
@@ -566,24 +588,31 @@ void I_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 			{
 				case 0: // b000
 					lb(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("lb", "d1i", riscv_decoder, riscv_register);
 					break;
 				case 1: // b001
 					lh(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("lh", "d1i", riscv_decoder, riscv_register);
 					break;
 				case 2: // b010
 					lw(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("lw", "d1i", riscv_decoder, riscv_register);
 					break;
 				case 3: // b011
 					ld(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("ld", "d1i", riscv_decoder, riscv_register);
 					break;
 				case 4: // b100
 					lbu(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("lbu", "d1i", riscv_decoder, riscv_register);
 					break;
 				case 5: // b101
 					lhu(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("lhu", "d1i", riscv_decoder, riscv_register);
 					break;
 				case 6: // b110
 					lwu(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("lwu", "d1i", riscv_decoder, riscv_register);
 					break;
 				default:
 					Error_NoDef(riscv_decoder);
@@ -606,21 +635,28 @@ void I_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 			{
 				case 0: // b000
 					addi(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("addi", "d1i", riscv_decoder, riscv_register);
 					break;
 				case 2: // b010
 					slti(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("slti", "d1i", riscv_decoder, riscv_register);
 					break;
 				case 3: // b011
 					sltiu(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("sltiu", "d1i", riscv_decoder, riscv_register);
 					break;
 				case 4: // b100
 					xori(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("xori", "d1i", riscv_decoder, riscv_register);
 					break;
 				case 6: // b110
 					ori(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("ori", "d1i", riscv_decoder, riscv_register);
 					break;
 				case 7: // b111
 					andi(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->I_immediate);
+					DEBUG_INST("andi", "d1i", riscv_decoder, riscv_register);
+					break;
 				default:
 					Error_NoDef(riscv_decoder);
 			}
@@ -652,15 +688,19 @@ void S_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 			{
 				case 0: // b000
 					sb(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->S_immediate);
+					DEBUG_INST("sb", "12i", riscv_decoder, riscv_register);
 					break;
 				case 1: // b001
 					sh(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->S_immediate);
+					DEBUG_INST("sh", "12i", riscv_decoder, riscv_register);
 					break;
 				case 2: // b010
 					sw(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->S_immediate);
+					DEBUG_INST("sw", "12i", riscv_decoder, riscv_register);
 					break;
 				case 3: // b011
 					sd(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->S_immediate);
+					DEBUG_INST("sd", "12i", riscv_decoder, riscv_register);
 					break;
 				default:
 					Error_NoDef(riscv_decoder);
@@ -692,21 +732,27 @@ void SB_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register
 			{
 				case 0: // b000
 					beq(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->SB_immediate);
+					DEBUG_INST("beq", "12i", riscv_decoder, riscv_register);
 					break;
 				case 1: // b001
 					bne(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->SB_immediate);
+					DEBUG_INST("bne", "12i", riscv_decoder, riscv_register);
 					break;
 				case 4: // b400
 					blt(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->SB_immediate);
+					DEBUG_INST("blt", "12i", riscv_decoder, riscv_register);
 					break;
 				case 5: // b101
 					bge(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->SB_immediate);
+					DEBUG_INST("bge", "12i", riscv_decoder, riscv_register);
 					break;
 				case 6: // b110
 					bltu(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->SB_immediate);
+					DEBUG_INST("bltu", "12i", riscv_decoder, riscv_register);
 					break;
 				case 7: // b111
 					bgeu(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->SB_immediate);
+					DEBUG_INST("bgeu", "12i", riscv_decoder, riscv_register);
 					break;
 				default:
 					Error_NoDef(riscv_decoder);
@@ -723,9 +769,11 @@ void U_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 	{
 		case 0x37: // b0110111
 			lui(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->U_immediate);
+			DEBUG_INST("lui", "di", riscv_decoder, riscv_register);
 			break;
 		case 0x17: // b0010111
 			auipc(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->U_immediate);
+			DEBUG_INST("auipc", "di", riscv_decoder, riscv_register);
 			break;
 		default:
 			Error_NoDef(riscv_decoder);
@@ -738,6 +786,7 @@ void UJ_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register
 	{
 		case 0x6F: // b1101111
 			jal(riscv_register, riscv_memory, riscv_decoder->rd, riscv_decoder->UJ_immediate);
+			DEBUG_INST("jal", "di", riscv_decoder, riscv_register);
 			break;
 		default:
 			Error_NoDef(riscv_decoder);

@@ -1,8 +1,11 @@
+#ifndef __EXECUTE_H__
+#define __EXECUTE_H__
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "parse_elf.h"
 #include "riscv_instruction.h"
+#include "debug.h"
 
 #define GET_ARRAY_LEN(array) (sizeof(array) / sizeof(array[0]))  // get the length of an array
 
@@ -33,4 +36,4 @@ instruction fetch(Riscv64_memory*, Riscv64_register*); // fetch a instruction me
 void decode(Riscv64_decoder*, instruction inst); // decode
 void execute(Riscv64_decoder*, Riscv64_register*, Riscv64_memory*); // merge the E & M & W in one step?
 
-
+#endif
