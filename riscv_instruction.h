@@ -21,7 +21,10 @@
 /* If you take the steps above correctly, your new instruction     */
 /* will work!                                                      */
 /*******************************************************************/
+#ifndef __RISCV_INSTRUCTION_H__
+#define __RISCV_INSTRUCTION_H__
 #include "memory_system.h"
+#include "debug.h"
 #include <unistd.h>
 #include <sys/time.h>
 
@@ -317,3 +320,5 @@ void fcvt_D_WU(Riscv64_register*, int rd, int rs1); // unsigned word(32-bit) -> 
 void feq_D(Riscv64_register*, int rd, int rs1, int rs2); // ==
 void flt_D(Riscv64_register*, int rd, int rs1, int rs2); // <
 void fle_D(Riscv64_register*, int rd, int rs1, int rs2); // <=
+
+#endif

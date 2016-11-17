@@ -184,6 +184,31 @@ void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 	riscv_decoder->rs3          = RS3(inst);
 	riscv_decoder->width        = WIDTH(inst);
 
+	// get an immediate regardless of INS_TYPE, for debug convenience
+	switch (GetINSTYPE(riscv_decoder))
+	{
+		case R_TYPE:
+			break;
+		case I_TYPE:
+			riscv_decoder->immediate = I_IMM(inst);
+			break;
+		case S_TYPE:
+			riscv_decoder->immediate = S_IMM(inst);
+			break;
+		case SB_TYPE:
+			riscv_decoder->immediate = SB_IMM(inst);
+			break;
+		case U_TYPE:
+			riscv_decoder->immediate = U_IMM(inst);
+			break;
+		case UJ_TYPE:
+			riscv_decoder->immediate = UJ_IMM(inst);;
+			break;
+		default:
+			printf("error: OPCODE not defined!\n");
+			Error_NoDef(riscv_decoder);
+	}	
+
 	return;
 }
 

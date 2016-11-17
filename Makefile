@@ -1,4 +1,4 @@
-OBJECTS = memory_system.o riscv_instruction.o execute.o
+OBJECTS = memory_system.o riscv_instruction.o execute.o debug.o
 COMPILEFLAGS = -lm -fno-stack-protector
 
 simulator : $(OBJECTS)
@@ -11,6 +11,8 @@ riscv_instruction.o : riscv_instruction.c riscv_instruction.h
 	gcc -c riscv_instruction.c $(COMPILEFLAGS)
 execute.o : execute.c execute.h
 	gcc -c execute.c $(COMPILEFLAGS)
+debug.o : debug.c debug.h
+	gcc -c debug.c $(COMPILEFLAGS)
 
 clean :
 	    rm simulator $(OBJECTS)

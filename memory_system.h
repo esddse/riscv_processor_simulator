@@ -1,3 +1,5 @@
+#ifndef __MEMORY_SYSTEM_H__
+#define __MEMORY_SYSTEM_H__
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -71,6 +73,7 @@ typedef struct riscv64_decoder{
 	int SB_immediate;
 	int U_immediate;
 	int UJ_immediate;
+	int immediate;
 	// floating-point
 	int csr;
 	int funct5;
@@ -165,3 +168,5 @@ reg64 get_register_fcsr(Riscv64_register*); // get a 64-bit value from fcsr
 
 void set_register_fp(Riscv64_register*, int index, reg64 value);// set floating-point register f[index] = value (64-bit needed)
 reg64 get_register_fp(Riscv64_register*, int index); // get a 64-bit value from floating-pointer register f[index]
+
+#endif
