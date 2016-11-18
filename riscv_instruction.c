@@ -325,6 +325,22 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 							Error_NoDef(riscv_decoder);
 					}
 					break;
+				case 0x11: // b0010001
+					switch(riscv_decoder->funct3)
+					{
+						case 0: // b000
+							fsgnj_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 1: // b001
+							fsgnjn_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						case 2: // b010
+							fsgnjx_D(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
+							break;
+						default:
+							Error_NoDef(riscv_decoder);
+					}
+					break;
 				case 0x2c: // b0101100 fsqrt_S
 					fsqrt_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->rs2);
 					break;
@@ -404,6 +420,12 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 						case 1: // b00001 fcvt_WU_S
 							fcvt_WU_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
 							break;
+						case 2: // b00010
+							fcvt_L_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+							break;
+						case 3: // b00011
+							fcvt_LU_S(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+							break;
 						default:
 							Error_NoDef(riscv_decoder);
 					}
@@ -429,6 +451,12 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 							break;
 						case 1: // b00001 fcvt_S_WU
 							fcvt_S_WU(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+							break;
+						case 2: // b00010 fcvt_W_D
+							fcvt_S_L(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
+							break;
+						case 3: // b00011 fcvt_WU_D
+							fcvt_S_LU(riscv_register, riscv_decoder->rd, riscv_decoder->rs1);
 							break;
 						default:
 							Error_NoDef(riscv_decoder);
@@ -1203,7 +1231,9 @@ void scall(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)
         	break;
         case 80: // fstat
         	break;
-
+        case 62: // lseek
+        	riscv_register->x[10] = (reg64)lseek((int)riscv_register->x[10], (off_t)riscv_register->x[11], (int)riscv_register->x[12]);
+        	break;
 		default:
 			printf("System call type %d not defined!", (int)riscv_register->x[17]);
 			// Error_NoDef(riscv_decoder);
@@ -1570,6 +1600,40 @@ void fle_S(Riscv64_register* riscv_register, int rd, int rs1, int rs2) // <=
 		set_register_general(riscv_register, rd, 1);
 	else
 		set_register_general(riscv_register, rd, 0);
+}
+
+/*********************************************/
+/*                                           */
+/* functions for instructions RV64F          */
+/*                                           */
+/*********************************************/
+void fcvt_L_S(Riscv64_register* riscv_register, int rd, int rs1)
+{
+	reg64 src_reg64 = get_register_fp(riscv_register, rs1);
+	float src_float = *((float*)&src_reg64);
+	long int dest_int = (long int)src_float;
+	set_register_general(riscv_register, rd, dest_int);
+}
+void fcvt_LU_S(Riscv64_register* riscv_register, int rd, int rs1)
+{
+	reg64 src_reg64 = get_register_fp(riscv_register, rs1);
+	float src_float = *((float*)&src_reg64);
+	unsigned long int dest_int = (unsigned long int)src_float;
+	set_register_general(riscv_register, rd, dest_int);
+}
+void fcvt_S_L(Riscv64_register* riscv_register, int rd, int rs1)
+{
+	reg64 src_reg64 = get_register_general(riscv_register, rs1);
+	long int src_int = (long int)src_reg64;
+	float dest_float = (float)src_int;
+	set_register_fp(riscv_register, rd, (unsigned long int)(*((unsigned int*)&dest_float)));	
+}
+void fcvt_S_LU(Riscv64_register* riscv_register, int rd, int rs1)
+{
+	reg64 src_reg64 = get_register_general(riscv_register, rs1);
+	unsigned long int src_int = (unsigned long int)src_reg64;
+	float dest_float = (float)src_int;
+	set_register_fp(riscv_register, rd, (unsigned long int)(*((unsigned int*)&dest_float)));
 }
 
 

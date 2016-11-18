@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include "memory_system.h"
 
-//#define DEBUG
+#define DEBUG
 
 // void DEBUG(char* p1, ...);
 void DEBUG_MESSAGE(char* message);

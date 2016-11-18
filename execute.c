@@ -213,7 +213,6 @@ void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 		case R_TYPE:
 			break;
 		case R4_TYPE:
-			printf("why not break?\n");
 			break;
 		case I_TYPE:
 			riscv_decoder->immediate = I_IMM(inst);
@@ -247,6 +246,9 @@ void execute(Riscv64_decoder* riscv_decoder,
 	{
 		case R_TYPE:
 			R_execute(riscv_decoder, riscv_register, riscv_memory);
+			break;
+		case R4_TYPE:
+			R4_execute(riscv_decoder, riscv_register, riscv_memory);
 			break;
 		case I_TYPE:
 			I_execute(riscv_decoder, riscv_register, riscv_memory);

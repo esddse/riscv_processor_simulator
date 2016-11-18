@@ -27,7 +27,7 @@
 #include "debug.h"
 #include <unistd.h>
 #include <sys/time.h>
-
+#include <sys/types.h>
 /* some tool macro */
 #define MAX(a,b)  (a>b?a:b)
 #define MIN(a,b)  (a<b?a:b)
@@ -286,6 +286,16 @@ void fmv_S_X(Riscv64_register*, int rd, int rs1, int rs2);
 void feq_S(Riscv64_register*, int rd, int rs1, int rs2); // ==
 void flt_S(Riscv64_register*, int rd, int rs1, int rs2); // <
 void fle_S(Riscv64_register*, int rd, int rs1, int rs2); // <=
+
+/*********************************************/
+/*                                           */
+/* functions for instructions RV64F          */
+/*                                           */
+/*********************************************/
+void fcvt_L_S(Riscv64_register*, int rd, int rs1);
+void fcvt_LU_S(Riscv64_register*, int rd, int rs1);
+void fcvt_S_L(Riscv64_register*, int rd, int rs1);
+void fcvt_S_LU(Riscv64_register*, int rd, int rs1);
 
 
 /*********************************************/
