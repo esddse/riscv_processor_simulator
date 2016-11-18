@@ -1,6 +1,8 @@
 #include "memory_system.h"
 
-
+// somthing for debug
+bool debug_flag = FALSE;
+unsigned long int pause_addr = -1;
 
 /*********************************************/
 /*                                           */

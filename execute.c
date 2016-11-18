@@ -24,6 +24,11 @@
 #include "execute.h"
 
 extern int EXIT_HAPPENED;
+
+// something for debug
+extern bool debug_flag;
+extern unsigned long int pause_addr;
+
 /*********************************************/
 /*                                           */
 /* functions for parsing elf and load program*/
@@ -104,8 +109,6 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 			set_register_pc(riscv_register, (reg64)program_header->p_vaddr);
 		}
 		EXIT_HAPPENED = FALSE;
-		printf("the first instruction is %x\n", *(instruction*)p_seg_actual_addr);
-
 	}
 /*
 	// section
@@ -156,6 +159,13 @@ instruction fetch(Riscv64_memory* riscv_memory, Riscv64_register* riscv_register
 	instruction inst = (instruction) get_memory_reg64(riscv_memory, virtual_addr_pc);
 	register_pc_self_increase(riscv_register);
 	printf("pc=%x  instruction=%x \n", virtual_addr_pc, inst);
+
+	//check whether to debug
+	if((int)virtual_addr_pc == (int)pause_addr)
+	{
+		debug_flag = TRUE;
+	}
+
 	return inst;
 }
 
@@ -234,6 +244,13 @@ int main(int argc, char const *argv[])
 		return 0;
 	}
 
+
+	#ifdef DEBUG
+	printf("Now in DEBUG mode.\n");
+	printf("Please type in the address(hexadecimal) where the program will be paused:\n");
+	scanf("%x", &pause_addr);
+	#endif
+
 	int file_num = argc - 1; // number of file
 	FILE *file_p;  // file pointer
 
@@ -292,6 +309,38 @@ int main(int argc, char const *argv[])
 			instruction inst = fetch(riscv_memory, riscv_register);
 			decode(riscv_decoder, inst);
 			execute(riscv_decoder, riscv_register, riscv_memory);
+
+			// debug mode
+			if(debug_flag == TRUE)
+			{
+				char command[30];
+				printf("Please enter command:\n");
+				while(1)
+				{
+					scanf("%s", command);
+					// exit program directly
+					if(strcmp(command, "exit") == 0)
+					{
+						exit(0);
+					}
+					// quit the debug mode and continue to run 
+					else if(strcmp(command, "run") == 0)
+					{	
+						debug_flag = FALSE;
+						break;
+					}
+					// next instruction
+					else if(strcmp(command, "n") == 0)
+					{
+						break;
+					}	
+					else 
+					{
+						printf("invalid command!\n");
+					}
+				}
+				
+			}
 		}
 
 		printf("Program exits!\n");

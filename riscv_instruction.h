@@ -25,9 +25,6 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-#define FALSE 0
-#define TRUE  1
-
 /* some tool macro */
 #define MAX(a,b)  (a>b?a:b)
 #define MIN(a,b)  (a<b?a:b)
@@ -56,7 +53,7 @@ typedef enum
 #define RS1(inst)        ((inst&ONES(19,15))>>15)    // 5
 #define RS2(inst)        ((inst&ONES(24,20))>>20)    // 5
 #define SHAMT64(inst)    ((inst&ONES(25,20))>>20)    // 6, RV64I
-#define SHAMT32(inst)    ((inst&ONES(25,20))>>20)    // 5, RV64I
+#define SHAMT32(inst)    ((inst&ONES(24,20))>>20)    // 5, RV64I
 #define IMM_SIGN(inst)   ((inst>>31)&1)              // sign of immediate
 /* floating-point */
 #define CSR(inst)        ((inst&ONES(31,20))>>20)    // 12
@@ -175,6 +172,7 @@ void blt(Riscv64_register*, Riscv64_memory*, int rs1, int rs2, int imm);
 void bge(Riscv64_register*, Riscv64_memory*, int rs1, int rs2, int imm);
 void bltu(Riscv64_register*, Riscv64_memory*, int rs1, int rs2, int imm);
 void bgeu(Riscv64_register*, Riscv64_memory*, int rs1, int rs2, int imm);
+
 
 /* Jump & Link */
 void jal(Riscv64_register*, Riscv64_memory*, int rd, int imm);
@@ -317,3 +315,4 @@ void fcvt_D_WU(Riscv64_register*, int rd, int rs1); // unsigned word(32-bit) -> 
 void feq_D(Riscv64_register*, int rd, int rs1, int rs2); // ==
 void flt_D(Riscv64_register*, int rd, int rs1, int rs2); // <
 void fle_D(Riscv64_register*, int rd, int rs1, int rs2); // <=
+

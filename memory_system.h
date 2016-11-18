@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define DEBUG
+
 
 typedef unsigned char      reg8;
 typedef unsigned short int reg16;
@@ -12,6 +14,9 @@ typedef unsigned long int  reg64;
 typedef unsigned char bool;
 typedef unsigned char byte;
 typedef unsigned int instruction;
+
+#define FALSE 0
+#define TRUE  1
 
 // abi 
 #define zero x[0]    // Hard-wired zero

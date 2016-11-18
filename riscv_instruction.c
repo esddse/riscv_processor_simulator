@@ -23,6 +23,10 @@
 /*******************************************************************/
 #include "riscv_instruction.h"
 
+// something for debug 
+extern bool debug_flag;
+extern unsigned long int pause_addr;
+
 // a flag which shows whether syscall exit happened
 int EXIT_HAPPENED = FALSE;
 
@@ -452,10 +456,9 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 			switch(riscv_decoder->funct3)
 			{
 				case 1: // b001
-					switch(riscv_decoder->funct7)
+					switch(riscv_decoder->funct6)
 					{
 						case 0x00: // b0000000
-						case 0x01: // b0000001
 							slli(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt64);
 							break;
 						default:
@@ -463,14 +466,12 @@ void R_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 					}
 					break;
 				case 5: // b101
-					switch(riscv_decoder->funct7)
+					switch(riscv_decoder->funct6)
 					{
-						case 0x00: // b0000000
-						case 0x01: // b0000001
+						case 0x00: // b000000
 							srli(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt64);
 							break;
-						case 0x20: // b0100000
-						case 0x21: // b0100001
+						case 0x10: // b010000
 							srai(riscv_register, riscv_decoder->rd, riscv_decoder->rs1, riscv_decoder->shamt64);
 							break;
 						default:
@@ -670,7 +671,7 @@ void S_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 			switch(riscv_decoder->funct3)
 			{
 				case 2: // b010 fsw
-					flw(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->S_immediate);
+					fsw(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->S_immediate);
 					break;
 				case 3: // b011 fsd
 					fsd(riscv_register, riscv_memory, riscv_decoder->rs1, riscv_decoder->rs2, riscv_decoder->S_immediate);
@@ -678,6 +679,7 @@ void S_execute(Riscv64_decoder* riscv_decoder, Riscv64_register* riscv_register,
 				default:
 					Error_NoDef(riscv_decoder);
 			}
+			break;
 		default:
 			Error_NoDef(riscv_decoder);
 	}
@@ -848,6 +850,7 @@ void ori(Riscv64_register* riscv_register, int rd, int rs1, int imm)        // o
 void and(Riscv64_register* riscv_register, int rd, int rs1, int rs2)        // and
 {
 	riscv_register->x[rd] = riscv_register->x[rs1] & riscv_register->x[rs2];
+	printf("and1=%x, and2=%x\n", riscv_register->x[rs1], riscv_register->x[rs2]);
 }
 void andi(Riscv64_register* riscv_register, int rd, int rs1, int imm)       // and immediate
 {
@@ -926,6 +929,7 @@ void beq(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rs1
 	                                                                                          // we have to subtract it to get the current pc
 	if(riscv_register->x[rs1] - riscv_register->x[rs2] == 0)
 		set_register_pc(riscv_register, reg_value);
+	printf("register_value=%d", riscv_register->x[rs1]);
 }
 void bne(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rs1, int rs2, int imm)
 {
@@ -1109,11 +1113,8 @@ void ld(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd, 
 /* Stores */
 void sd(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rs1, int rs2, int imm)
 {
-	printf("rs1=%d, rs2=%d, imm=%d ", rs1, rs2, imm);
-
 	reg64 reg_value = get_register_general(riscv_register, rs1);
 	reg64 store_value = get_register_general(riscv_register, rs2);
-	printf("reg_value=%x \n", reg_value);
 	set_memory_reg64(riscv_memory, (byte*)(reg_value + imm), store_value);
 }
 
@@ -1227,7 +1228,7 @@ void flw(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd,
 void fsw(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rs1, int rs2, int imm)
 {
 	reg64 reg_value = get_register_general(riscv_register, rs1);
-	reg32 store_value = get_memory_reg32(riscv_memory, (byte*)(unsigned long int)rs2);
+	reg32 store_value = (reg32)get_register_fp(riscv_register, rs2);
 	set_memory_reg32(riscv_memory, (byte*)(reg_value + imm), store_value);
 }
 
@@ -1373,8 +1374,8 @@ void fld(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rd,
 void fsd(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory, int rs1, int rs2, int imm)
 {
 	reg64 reg_value = get_register_general(riscv_register, rs1);
-	reg64 store_value = get_memory_reg32(riscv_memory, (byte*)(unsigned long int)rs2);
-	set_memory_reg32(riscv_memory, (byte*)(reg_value + imm), store_value);
+	reg64 store_value = (reg64)get_register_fp(riscv_register, rs2);
+	set_memory_reg64(riscv_memory, (byte*)(reg_value + imm), store_value);
 }
 
 /* Arithmetics */
