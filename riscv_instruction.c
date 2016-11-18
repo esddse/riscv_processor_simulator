@@ -1172,7 +1172,9 @@ void scall(Riscv64_register* riscv_register, Riscv64_memory* riscv_memory)
         	break;
         case 80: // fstat
         	break;
-
+        case 62: // lseek
+        	riscv_register->x[10] = (reg64)lseek((int)riscv_register->x[10], (off_t)riscv_register->x[11], (int)riscv_register->x[12]);
+        	break;
 		default:
 			printf("System call type %d not defined!", (int)riscv_register->x[17]);
 			// Error_NoDef(riscv_decoder);
