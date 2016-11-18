@@ -269,10 +269,18 @@ void fnmadd_S(Riscv64_register*, int rd, int rs1, int rs2, int rs3); // -(rs1*rs
 void fnmsub_S(Riscv64_register*, int rd, int rs1, int rs2, int rs3); // -(rs1*rs2-rs3)
 
 /* Type Conversion */
+void fcvt_S_L(Riscv64_register*, int rd, int rs1);
 void fcvt_W_S(Riscv64_register*, int rd, int rs1);  // single-precision fp   -> signed word(32-bit)
 void fcvt_WU_S(Riscv64_register*, int rd, int rs1); // single-precision fp   -> unsigned word(32-bit)
 void fcvt_S_W(Riscv64_register*, int rd, int rs1);  // signed word(32-bit)   -> single-precision fp
 void fcvt_S_WU(Riscv64_register*, int rd, int rs1); // unsigned word(32-bit) -> single-precision fp
+
+void fsgnj_S(Riscv64_register*, int rd, int rs1, int rs2);
+void fsgnjn_S(Riscv64_register*, int rd, int rs1, int rs2);
+void fsgnjx_S(Riscv64_register*, int rd, int rs1, int rs2);
+
+void fmv_X_S(Riscv64_register*, int rd, int rs1, int rs2);
+void fmv_S_X(Riscv64_register*, int rd, int rs1, int rs2);
 
 /* Compare */
 void feq_S(Riscv64_register*, int rd, int rs1, int rs2); // ==
@@ -313,6 +321,13 @@ void fcvt_W_D(Riscv64_register*, int rd, int rs1);  // double-precision fp   -> 
 void fcvt_WU_D(Riscv64_register*, int rd, int rs1); // double-precision fp   -> unsigned word(32-bit)
 void fcvt_D_W(Riscv64_register*, int rd, int rs1);  // signed word(32-bit)   -> double-precision fp
 void fcvt_D_WU(Riscv64_register*, int rd, int rs1); // unsigned word(32-bit) -> double-precision fp
+
+void fsgnj_D(Riscv64_register*, int rd, int rs1, int rs2);
+void fsgnjn_D(Riscv64_register*, int rd, int rs1, int rs2);
+void fsgnjx_D(Riscv64_register*, int rd, int rs1, int rs2);
+
+void fmv_X_D(Riscv64_register*, int rd, int rs1, int rs2);
+void fmv_D_X(Riscv64_register*, int rd, int rs1, int rs2);
 
 /* Compare */
 void feq_D(Riscv64_register*, int rd, int rs1, int rs2); // ==

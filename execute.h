@@ -7,9 +7,6 @@
 #include "riscv_instruction.h"
 #include "debug.h"
 
-#define GET_ARRAY_LEN(array) (sizeof(array) / sizeof(array[0]))  // get the length of an array
-
-
 /*********************************************/
 /*                                           */
 /* useful tool function here, just for debug */
