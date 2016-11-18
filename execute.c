@@ -89,8 +89,6 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 	int ph_size = elf_header->e_phentsize;
 	int ph_num = elf_header->e_phnum;
 
-	printf("segment_num = %d\n", ph_num);
-
 	// load segment to virtual memory one by one
 	for(int i = 0; i < ph_num; i++)
 	{
@@ -100,7 +98,6 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 		byte* p_seg_in_file = (byte*)elf_header + program_header->p_offset;
 		// pointer to segment in the virtual memory
 		byte* p_seg_actual_addr = get_actual_addr(riscv_memory, (byte*)program_header->p_vaddr);
-
 		// copy the segment to virtual memory
 		memcpy(p_seg_actual_addr, p_seg_in_file, program_header->p_memsz);
 		// set pc to head of the 1st seg
@@ -110,7 +107,7 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 		}
 		EXIT_HAPPENED = FALSE;
 	}
-/*
+
 	// section
 	Elf64_Shdr* section_header_1 = (Elf64_Shdr*)((byte*)elf_header + elf_header->e_shoff);
 	int sh_size = elf_header->e_shentsize;
@@ -120,6 +117,8 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 	Elf64_Sym* symbol_tabel_1 = NULL;
 	unsigned long int symtab_size = sizeof(Elf64_Sym);
 	unsigned long int symtab_num = 0;
+	// pointer to the string table
+	byte* string_table = NULL;
 
 	for(int i = 0; i < sh_num; i++)
 	{
@@ -134,15 +133,26 @@ void load_program(Elf64_Ehdr* elf_header, Riscv64_register* riscv_register, Risc
 			// calculate the number of symbol table
 			symtab_num = section_header->sh_size / symtab_size;
 		}
+		// string table
+		else if(section_header->sh_type == SHT_STRTAB)
+		{
+			string_table = (byte*)elf_header + section_header->sh_offset;
+		}
 	}
 
 	// symbol table
 	for(int i = 0; i < symtab_num; i++)
 	{
 		Elf64_Sym* symbol_table = (Elf64_Sym*)((byte*)symbol_tabel_1 + symtab_size*i);
-		//printf("the value of symbol is : %x\n", symbol_table->st_name);
+		//printf("the name of symbol is : %s\n", string_table + symbol_table->st_name);
+
+		// get edata (for heap)
+		if(strcmp(string_table+symbol_table->st_name, "_edata") == 0)
+		{
+			riscv_memory->edata = symbol_table->st_value;
+		}
 	}
-*/
+
 	return;
 }
 
@@ -158,7 +168,10 @@ instruction fetch(Riscv64_memory* riscv_memory, Riscv64_register* riscv_register
 	byte* virtual_addr_pc = (byte*) get_register_pc(riscv_register);
 	instruction inst = (instruction) get_memory_reg64(riscv_memory, virtual_addr_pc);
 	register_pc_self_increase(riscv_register);
+
+	#ifdef DEBUG
 	printf("pc=%x  instruction=%x \n", virtual_addr_pc, inst);
+	#endif
 
 	//check whether to debug
 	if((int)virtual_addr_pc == (int)pause_addr)
@@ -193,6 +206,31 @@ void decode(Riscv64_decoder* riscv_decoder, instruction inst)
 	riscv_decoder->rm           = RM(inst);
 	riscv_decoder->rs3          = RS3(inst);
 	riscv_decoder->width        = WIDTH(inst);
+
+	// get an immediate regardless of INS_TYPE, for debug convenience
+	switch (GetINSTYPE(riscv_decoder))
+	{
+		case R_TYPE:
+			break;
+		case I_TYPE:
+			riscv_decoder->immediate = I_IMM(inst);
+			break;
+		case S_TYPE:
+			riscv_decoder->immediate = S_IMM(inst);
+			break;
+		case SB_TYPE:
+			riscv_decoder->immediate = SB_IMM(inst);
+			break;
+		case U_TYPE:
+			riscv_decoder->immediate = U_IMM(inst);
+			break;
+		case UJ_TYPE:
+			riscv_decoder->immediate = UJ_IMM(inst);;
+			break;
+		default:
+			printf("error: OPCODE not defined!\n");
+			Error_NoDef(riscv_decoder);
+	}	
 
 	return;
 }
@@ -313,33 +351,7 @@ int main(int argc, char const *argv[])
 			// debug mode
 			if(debug_flag == TRUE)
 			{
-				char command[30];
-				printf("Please enter command:\n");
-				while(1)
-				{
-					scanf("%s", command);
-					// exit program directly
-					if(strcmp(command, "exit") == 0)
-					{
-						exit(0);
-					}
-					// quit the debug mode and continue to run 
-					else if(strcmp(command, "run") == 0)
-					{	
-						debug_flag = FALSE;
-						break;
-					}
-					// next instruction
-					else if(strcmp(command, "n") == 0)
-					{
-						break;
-					}	
-					else 
-					{
-						printf("invalid command!\n");
-					}
-				}
-				
+				DEBUG_MODE(riscv_register, riscv_memory);
 			}
 		}
 

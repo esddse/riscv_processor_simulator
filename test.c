@@ -4,10 +4,8 @@
 
 int main()
 {
-	int a = 1;
-	if(a == 1)
-	{
-		a = 1;
-	}
+	int* addr = (int*)malloc(sizeof(int)*10);
+	addr[6] = 1087;
+	printf("%d\n", addr[6]);
 	return 0;
 }
