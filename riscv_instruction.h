@@ -27,7 +27,7 @@
 #include "debug.h"
 #include <unistd.h>
 #include <sys/time.h>
-
+#include <sys/types.h>
 /* some tool macro */
 #define MAX(a,b)  (a>b?a:b)
 #define MIN(a,b)  (a<b?a:b)
