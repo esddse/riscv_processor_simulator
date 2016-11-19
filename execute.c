@@ -248,7 +248,7 @@ void execute(Riscv64_decoder* riscv_decoder,
 			R_execute(riscv_decoder, riscv_register, riscv_memory);
 			break;
 		case R4_TYPE:
-			R4_execute(riscv_decoder, riscv_register, riscv_memory);
+//			R4_execute(riscv_decoder, riscv_register, riscv_memory);
 			break;
 		case I_TYPE:
 			I_execute(riscv_decoder, riscv_register, riscv_memory);
@@ -346,8 +346,8 @@ int main(int argc, char const *argv[])
 		//load program
 		load_program(elf_header, riscv_register, riscv_memory);
 
-		int j = 100;
-		while(j && !EXIT_HAPPENED)
+		long int count = 0;
+		while(!EXIT_HAPPENED)
 		{
 			instruction inst = fetch(riscv_memory, riscv_register);
 			decode(riscv_decoder, inst);
@@ -358,9 +358,12 @@ int main(int argc, char const *argv[])
 			{
 				DEBUG_MODE(riscv_register, riscv_memory);
 			}
+
+			count += 1;
 		}
 
 		printf("Program exits!\n");
+		printf("%ld instructions executed.\n", count);
 		// gc
 		delete_memory_system(riscv_decoder, riscv_register, riscv_memory);
 		free(buffer);

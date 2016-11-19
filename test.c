@@ -4,8 +4,6 @@
 
 int main()
 {
-	int* addr = (int*)malloc(sizeof(int)*10);
-	addr[6] = 1087;
-	printf("%d\n", addr[6]);
-	return 0;
+	float a = 3.0;
+	printf("%f\n", a);
 }
